@@ -1,0 +1,205 @@
+<view class="page">
+  <image class="scene-bg" src="{{round.imageUrl}}" mode="aspectFill" bindtap="previewImage" />
+  <view class="page-shade"></view>
+
+  <view class="top-bar">
+    <text class="round-no">{{round.roundIndex}} / {{round.totalRounds}}</text>
+  </view>
+
+  <view class="year-overlay">
+    <text class="year-big">{{displayYearShort}}</text>
+    <text class="dynasty-big">{{currentDynastyTitle || '—'}}</text>
+  </view>
+
+  <view
+    class="map-backdrop {{mapExpanded ? 'map-backdrop--show' : ''}}"
+    bindtap="collapseMap"
+    catchtouchmove="noop"
+  ></view>
+
+  <view
+    class="map-float {{mapExpanded ? 'map-float--expanded' : ''}} {{picked ? 'map-float--picked' : ''}}"
+    wx:if="{{!resultVisible}}"
+  >
+    <map
+      wx:if="{{!mapExpanded}}"
+      class="map-widget"
+      latitude="{{mapLat}}"
+      longitude="{{mapLng}}"
+      scale="3"
+      markers="{{markers}}"
+      enable-scroll="{{false}}"
+      enable-zoom="{{false}}"
+      enable-poi="{{true}}"
+      show-scale="{{false}}"
+    />
+    <map
+      wx:if="{{mapExpanded}}"
+      class="map-widget"
+      latitude="{{mapLat}}"
+      longitude="{{mapLng}}"
+      scale="1"
+      min-scale="1"
+      max-scale="14"
+      markers="{{markers}}"
+      enable-scroll="{{true}}"
+      enable-zoom="{{true}}"
+      enable-poi="{{true}}"
+      show-scale="{{true}}"
+      bindtap="onMapTap"
+    />
+    <view class="map-float-hit" wx:if="{{!mapExpanded}}" bindtap="expandMap"></view>
+    <view class="map-float-label" wx:if="{{!mapExpanded && !pickedCity}}">在哪里？</view>
+    <view class="map-picked-wrap" wx:if="{{mapExpanded && (pickedCity || cityResolving)}}">
+      <view class="map-picked-bar">
+        <text>{{cityResolving ? '识别城市中…' : '已选 ' + pickedCity}}</text>
+      </view>
+    </view>
+    <view class="map-float-done" wx:if="{{mapExpanded}}" catchtap="collapseMap">完成</view>
+  </view>
+
+  <view
+    class="map-city-chip"
+    wx:if="{{!mapExpanded && picked && pickedCity && !resultVisible}}"
+    bindtap="expandMap"
+  >
+    <text class="map-city-chip-label">已选</text>
+    <text class="map-city-chip-name">{{pickedCity}}</text>
+  </view>
+
+  <button
+    class="submit-pill {{picked && !resultVisible ? 'submit-pill--ready' : ''}}"
+    wx:if="{{!resultVisible}}"
+    disabled="{{!picked || submitting}}"
+    bindtap="onSubmit"
+  >
+    {{submitting ? '提交中' : '提交'}}
+  </button>
+
+  <view class="ruler-dock" wx:if="{{!resultVisible}}">
+    <view class="ruler-pointer"></view>
+    <scroll-view
+      class="ruler-scroll"
+      scroll-x="{{true}}"
+      scroll-left="{{scrollLeft}}"
+      bindscroll="onRulerScroll"
+      bindtouchend="onRulerTouchEnd"
+      show-scrollbar="{{false}}"
+    >
+      <view class="ruler-inner" style="width: {{rulerTotalWidth}}px;">
+        <view class="ruler-track" style="width: {{rulerInnerWidth}}px; margin-left: {{sidePad}}px;">
+          <view class="ruler-dynasty-row">
+            <view
+              wx:for="{{rulerSegments}}"
+              wx:key="name"
+              class="dynasty-mark"
+              style="left: {{item.left}}px; width: {{item.width}}px;"
+            >
+              <text wx:if="{{item.width > 28}}">{{item.name}}</text>
+            </view>
+          </view>
+          <view class="ruler-ticks-row">
+            <view
+              wx:for="{{rulerTicks}}"
+              wx:key="year"
+              class="scale-tick scale-tick-{{item.size}}"
+              style="left: {{item.left}}px;"
+            >
+              <view class="scale-tick-line"></view>
+              <text wx:if="{{item.label}}" class="scale-tick-label">{{item.label}}</text>
+            </view>
+          </view>
+        </view>
+      </view>
+    </scroll-view>
+  </view>
+
+  <!-- 本题结果：地图连线 + 底部弹窗 -->
+  <view
+    class="result-overlay {{resultSheetShow ? 'result-overlay--show' : ''}}"
+    wx:if="{{resultVisible}}"
+    catchtouchmove="noop"
+  >
+    <view class="result-map-panel">
+      <map
+        id="resultMap"
+        class="result-map"
+        key="{{resultMapKey}}"
+        latitude="{{resultMapLat}}"
+        longitude="{{resultMapLng}}"
+        scale="{{resultMapScale}}"
+        min-scale="2"
+        max-scale="10"
+        markers="{{resultMarkers}}"
+        polyline="{{resultPolyline}}"
+        enable-scroll="{{true}}"
+        enable-zoom="{{true}}"
+        show-scale="{{true}}"
+        enable-poi="{{true}}"
+        bindupdated="onResultMapUpdated"
+      />
+      <view class="result-map-legend">
+        <view class="legend-item">
+          <view class="legend-dot legend-dot--you"></view>
+          <text>你 · {{resultGuessCity}}</text>
+        </view>
+        <view class="legend-item">
+          <view class="legend-dot legend-dot--ans"></view>
+          <text>答 · {{resultAnswerCity}}</text>
+        </view>
+      </view>
+    </view>
+
+    <view class="result-sheet {{resultSheetShow ? 'result-sheet--show' : ''}}">
+      <view class="result-sheet-handle"></view>
+
+      <view class="result-stats-row">
+        <view class="result-stat">
+          <text class="result-stat-label">距离误差</text>
+          <text class="result-stat-value">{{resultDistanceLabel}}</text>
+        </view>
+        <view class="result-stat">
+          <text class="result-stat-label">朝代</text>
+          <text class="result-stat-value">{{resultDynastyScore}}</text>
+        </view>
+        <view class="result-stat">
+          <text class="result-stat-label">地理</text>
+          <text class="result-stat-value">{{resultGeoScore}}</text>
+        </view>
+        <view class="result-stat result-stat--total">
+          <text class="result-stat-label">总分</text>
+          <text class="result-stat-value">{{resultTotalScore}}</text>
+        </view>
+      </view>
+
+      <view class="result-event-bar" wx:if="{{resultKnowledgeTitle || resultAnecdoteTitle}}">
+        <text class="result-event-name">{{resultAnecdoteTitle || resultKnowledgeTitle}}</text>
+        <text class="result-event-time">{{resultEventTime}}</text>
+      </view>
+      <view class="result-location-hint" wx:if="{{resultAnecdoteTitle && resultKnowledgeTitle}}">
+        <text>{{resultKnowledgeTitle}} · {{resultAnswerCity}}</text>
+      </view>
+
+      <scroll-view class="result-sheet-scroll" scroll-y="{{true}}">
+        <view class="result-knowledge" wx:if="{{resultKnowledgeText}}">
+          <image
+            class="result-knowledge-img"
+            wx:if="{{resultKnowledgeImage}}"
+            src="{{resultKnowledgeImage}}"
+            mode="aspectFill"
+          />
+          <view class="result-knowledge-body">
+            <text class="result-knowledge-title">历史典故</text>
+            <text class="result-knowledge-text">{{resultKnowledgeText}}</text>
+            <view class="result-knowledge-foot">
+              <text class="result-knowledge-src">历史典故 · 本题场景</text>
+              <text class="result-baike-link" wx:if="{{resultBaikeUrl}}" bindtap="onOpenBaike">百度百科 ↗</text>
+            </view>
+          </view>
+        </view>
+      </scroll-view>
+
+      <button class="result-next-btn" bindtap="onResultNext">{{resultNextLabel}}</button>
+    </view>
+  </view>
+</view>

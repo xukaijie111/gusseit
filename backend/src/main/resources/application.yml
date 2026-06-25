@@ -1,0 +1,41 @@
+server:
+  port: ${PORT:8787}
+  address: ${HOST:0.0.0.0}
+
+spring:
+  application:
+    name: guseeit-backend
+  datasource:
+    url: jdbc:mysql://${MYSQL_HOST:127.0.0.1}:${MYSQL_PORT:3306}/${MYSQL_DATABASE:guseeit}?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai
+    username: ${MYSQL_USER:root}
+    password: ${MYSQL_PASSWORD:}
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
+
+guseeit:
+  cors-origins: http://localhost:5173,http://127.0.0.1:5173
+  qwen:
+    api-key: ${OPENAI_API_KEY:}
+    base-url: ${OPENAI_BASE_URL:https://dashscope.aliyuncs.com/compatible-mode/v1}
+    model: ${OPENAI_MODEL:qwen-plus}
+  ark:
+    api-key: ${ARK_API_KEY:}
+    base-url: ${ARK_BASE_URL:https://ark.cn-beijing.volces.com/api/v3}
+    model: ${IMAGE_MODEL:}
+    image-size: ${IMAGE_SIZE:1920x1920}
+  oss:
+    endpoint: ${OSS_ENDPOINT:}
+    bucket: ${OSS_BUCKET:}
+    public-base-url: ${OSS_PUBLIC_BASE_URL:}
+    prefix: ${OSS_PREFIX:guseeit/rounds}
+    access-key-id: ${OSS_ACCESS_KEY_ID:}
+    access-key-secret: ${OSS_ACCESS_KEY_SECRET:}
+    object-acl: ${OSS_OBJECT_ACL:public-read}
+  amap:
+    key: ${AMAP_WEB_KEY:}
+    base-url: ${AMAP_BASE_URL:https://restapi.amap.com/v3}

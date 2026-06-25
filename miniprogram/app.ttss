@@ -1,0 +1,33 @@
+page {
+  background: #f4f5f7;
+  color: #1a1f2e;
+  font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+}
+
+button {
+  font-size: 30rpx;
+}
+
+.primary-btn {
+  background: #b8860b;
+  color: #ffffff;
+  border: none;
+  border-radius: 16rpx;
+  font-weight: 600;
+}
+
+.primary-btn[disabled] {
+  opacity: 0.5;
+}
+
+.sub-text {
+  color: #64748b;
+  font-size: 26rpx;
+}
+
+.card {
+  background: #ffffff;
+  border: 1px solid #e2e6ed;
+  border-radius: 24rpx;
+  padding: 32rpx;
+}

@@ -1,0 +1,23 @@
+<view class="page">
+  <view class="score-card card">
+    <text class="score-label">本题得分</text>
+    <text class="score-value">{{totalScore}}</text>
+    <view class="score-row">
+      <text>朝代 {{dynastyScore}}</text>
+      <text>地理 {{geoScore}}</text>
+    </view>
+    <text class="sub-text">你选 {{guessDynastyTitle || '—'}} · 答案 {{answerDynastyTitle || '—'}}</text>
+    <text class="sub-text">城市相距 {{distanceKm}} km · 你选 {{guessCity}} · 答案 {{answerCity}}</text>
+    <text class="sub-text ref-line">刻度 {{guessYearLabel}} · 实际 {{answerYearLabel}}（仅供参考，不计分）</text>
+  </view>
+
+  <view class="card answer" wx:if="{{answer}}">
+    <text class="block-title">正确答案</text>
+    <text class="answer-line">{{answerDynastyTitle}} · {{answer.locationName}}</text>
+    <text class="sub-text">{{answer.modernPlace}}</text>
+    <text class="answer-time">{{answer.timeLabel}}</text>
+  </view>
+
+  <button class="primary-btn" bindtap="onNext">{{nextLabel}}</button>
+  <button class="ghost-btn" bindtap="onHome">返回首页</button>
+</view>
