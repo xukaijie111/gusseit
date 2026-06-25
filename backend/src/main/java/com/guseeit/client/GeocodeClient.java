@@ -212,11 +212,7 @@ public class GeocodeClient {
         if (name == null || name.trim().isEmpty()) {
             return "未知地区";
         }
-        String s = name.trim();
-        if (!s.endsWith("市") && !s.endsWith("县") && !s.endsWith("区") && s.length() <= 4) {
-            return s + "市";
-        }
-        return s;
+        return name.trim();
     }
 
     private double[] forwardSearch(String query) {

@@ -216,16 +216,16 @@
 
 .map-float-done {
   position: absolute;
-  right: 16rpx;
-  bottom: 16rpx;
-  padding: 10rpx 24rpx;
-  background: rgba(255, 255, 255, 0.94);
-  color: #1a1f2e;
-  font-size: 26rpx;
-  font-weight: 600;
+  right: 24rpx;
+  bottom: 24rpx;
+  padding: 18rpx 40rpx;
+  background: linear-gradient(135deg, #d4a052, #b8860b);
+  color: #fff;
+  font-size: 30rpx;
+  font-weight: 700;
   border-radius: 999rpx;
   z-index: 3;
-  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.2);
+  box-shadow: 0 6rpx 20rpx rgba(180, 120, 20, 0.4);
 }
 
 .submit-pill {

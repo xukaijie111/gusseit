@@ -1,6 +1,7 @@
 package com.guseeit.service;
 
 import com.guseeit.client.ArkImageClient;
+import com.guseeit.client.GeocodeClient;
 import com.guseeit.client.OssService;
 import com.guseeit.client.QwenClient;
 import com.guseeit.domain.Round;
@@ -8,7 +9,6 @@ import com.guseeit.domain.RoundStatus;
 import com.guseeit.dto.RoundPromptDto;
 import com.guseeit.repository.RoundRepository;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -23,17 +23,20 @@ public class GenerationService {
     private final QwenClient qwenClient;
     private final ArkImageClient arkImageClient;
     private final OssService ossService;
+    private final GeocodeClient geocodeClient;
 
     public GenerationService(
             RoundRepository roundRepository,
             QwenClient qwenClient,
             ArkImageClient arkImageClient,
-            OssService ossService
+            OssService ossService,
+            GeocodeClient geocodeClient
     ) {
         this.roundRepository = roundRepository;
         this.qwenClient = qwenClient;
         this.arkImageClient = arkImageClient;
         this.ossService = ossService;
+        this.geocodeClient = geocodeClient;
     }
 
     public static String dedupKey(String dynasty, String locationName, Integer yearAd) {
@@ -72,12 +75,25 @@ public class GenerationService {
 
         int successCount = 0;
         int failCount = 0;
+        int geocodeFailCount = 0;
 
         for (int i = 0; i < rounds.size(); i++) {
             RoundPromptDto meta = rounds.get(i);
             onProgress.onProgress(meta.getTimeLabel() + " · " + meta.getLocationName());
 
-            Round round = savePending(meta);
+            // 先验证高德地图能不能拿到经纬度
+            GeocodeClient.CityPoint cityPoint = geocodeClient.resolveCityCenter(meta.getModernPlace());
+            if (cityPoint == null) {
+                onProgress.onProgress(meta.getTimeLabel() + " 地理编码失败，跳过");
+                geocodeFailCount++;
+                continue;
+            }
+
+            Round round = meta.toEntity();
+            round.setLatitude(cityPoint.getLatitude());
+            round.setLongitude(cityPoint.getLongitude());
+            round.setStatus(RoundStatus.pending);
+            round = roundRepository.save(round);
 
             try {
                 byte[] imageBytes = arkImageClient.generateImage(meta.getPrompt());
@@ -104,14 +120,7 @@ public class GenerationService {
             }
         }
 
-        return new GenerationResult(successCount, failCount, rounds.size());
-    }
-
-    @Transactional
-    protected Round savePending(RoundPromptDto meta) {
-        Round round = meta.toEntity();
-        round.setStatus(RoundStatus.pending);
-        return roundRepository.save(round);
+        return new GenerationResult(successCount, failCount, geocodeFailCount, rounds.size());
     }
 
     private List<RoundPromptDto> dedupe(List<RoundPromptDto> rounds, Set<String> existingKeys) {
@@ -141,16 +150,19 @@ public class GenerationService {
     public static class GenerationResult {
         private final int successCount;
         private final int failCount;
+        private final int geocodeFailCount;
         private final int total;
 
-        public GenerationResult(int successCount, int failCount, int total) {
+        public GenerationResult(int successCount, int failCount, int geocodeFailCount, int total) {
             this.successCount = successCount;
             this.failCount = failCount;
+            this.geocodeFailCount = geocodeFailCount;
             this.total = total;
         }
 
         public int getSuccessCount() { return successCount; }
         public int getFailCount() { return failCount; }
+        public int getGeocodeFailCount() { return geocodeFailCount; }
         public int getTotal() { return total; }
     }
 }

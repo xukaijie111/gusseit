@@ -119,8 +119,8 @@ public class QwenClient {
             throw new IllegalStateException("第 " + (index + 1) + " 条朝代应为 " + dynasty);
         }
         String modern = GeocodeClient.formatCityLabel(dto.getModernPlace().trim());
-        if (modern.equals("未知地区") || !modern.endsWith("市")) {
-            throw new IllegalStateException("第 " + (index + 1) + " 条 modern_place 须为标准现代城市名（如西安市）");
+        if (modern.equals("未知地区")) {
+            throw new IllegalStateException("第 " + (index + 1) + " 条 modern_place 无法识别为城市");
         }
         dto.setModernPlace(modern);
         dto.setGeoQuery(modern);
@@ -158,8 +158,8 @@ public class QwenClient {
                         + "必须严格遵守：%n"
                         + "1. 每条关卡 dynasty 必须为「%s」。%n"
                         + "2. 地名分层（三者必填且含义不同）：%n"
-                        + "   - historical_city：历史城市名，如「长安」「洛阳」「汴京」，不含「市」后缀，用于答题展示；%n"
-                        + "   - modern_place：现代地级城市标准名称，须含「市」后缀，如「西安市」「洛阳市」；geo_query 必须与 modern_place 完全一致；%n"
+                        + "   - historical_city：历史城市名，如「长安」「洛阳」「汴京」，用于答题展示；%n"
+                        + "   - modern_place：现代地名，如「西安」「西安市」「洛阳」「洛阳市」「许昌」「许昌市」，用于高德地图 geocode 计算距离；geo_query 必须与 modern_place 完全一致；%n"
                         + "   - location_name：具体历史场景地点（建筑、关隘、桥、战场等），如「骊山烽火台」「天津桥」「函谷关」，不要与城市名重复。%n"
                         + "3. 每条关卡必须围绕一个真实、著名的历史典故（如烽火戏诸侯、卧薪尝胆、三顾茅庐、草船借箭、破釜沉舟等），scene_type 填典故简称（4～12 字）。%n"
                         + "4. prompt 为完整文生图提示词（一段文字），须将典故的关键场景可视化：写出具体人物、动作、环境、氛围，含 360度等距圆柱全景图、equirectangular panorama、2:1 画幅、无现代元素、全景无缝衔接；需要排除的内容也写在同一段里。%n"

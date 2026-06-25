@@ -1,0 +1,16 @@
+[Unit]
+Description=Guseeit API (Spring Boot)
+After=network.target mysqld.service
+Wants=mysqld.service
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/opt/guseeit
+EnvironmentFile=/opt/guseeit/.env
+ExecStart=/usr/bin/java -jar /opt/guseeit/guseeit-backend.jar --spring.profiles.active=prod
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

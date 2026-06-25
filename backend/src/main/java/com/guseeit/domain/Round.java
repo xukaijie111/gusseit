@@ -53,6 +53,12 @@ public class Round {
     @Column(name = "knowledge_summary", columnDefinition = "TEXT")
     private String knowledgeSummary;
 
+    @Column
+    private Double latitude;
+
+    @Column
+    private Double longitude;
+
     @Column(name = "image_url", length = 512)
     private String imageUrl;
 
@@ -184,6 +190,22 @@ public class Round {
 
     public void setKnowledgeSummary(String knowledgeSummary) {
         this.knowledgeSummary = knowledgeSummary;
+    }
+
+    public Double getLatitude() {
+        return latitude;
+    }
+
+    public void setLatitude(Double latitude) {
+        this.latitude = latitude;
+    }
+
+    public Double getLongitude() {
+        return longitude;
+    }
+
+    public void setLongitude(Double longitude) {
+        this.longitude = longitude;
     }
 
     public String getImageUrl() {

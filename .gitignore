@@ -6,3 +6,6 @@ output/
 .DS_Store
 backend/target/
 admin/dist/
+
+# 部署敏感信息
+deploy/ecs.env

@@ -260,28 +260,16 @@ Page({
 
   expandMap: function () {
     if (this.data.resultVisible) return;
-    var lat =
-      this.data.pickLat && this.data.pickLng ? this.data.pickLat : 35.0;
-    var lng =
-      this.data.pickLat && this.data.pickLng ? this.data.pickLng : 105.0;
     if (!this._mapViewReady) {
       this._mapViewReady = true;
     }
     this.setData({
       mapExpanded: true,
-      mapLat: lat,
-      mapLng: lng,
-      pickMapScale: 9,
     });
   },
 
   collapseMap: function () {
-    var patch = { mapExpanded: false, pickMapScale: 9 };
-    if (this.data.picked && this.data.pickLat && this.data.pickLng) {
-      patch.mapLat = this.data.pickLat;
-      patch.mapLng = this.data.pickLng;
-    }
-    this.setData(patch);
+    this.setData({ mapExpanded: false });
   },
 
   noop: function () {},
@@ -296,9 +284,6 @@ Page({
     this.setData({
       pickLat: lat,
       pickLng: lng,
-      mapLat: lat,
-      mapLng: lng,
-      pickMapScale: 9,
       picked: false,
       pickedCity: "",
       cityResolving: true,
@@ -330,7 +315,6 @@ Page({
           picked: true,
           pickedCity: city,
           cityResolving: false,
-          pickMapScale: 9,
           markers: [
             {
               id: 1,
@@ -338,15 +322,6 @@ Page({
               longitude: lng,
               width: 32,
               height: 32,
-              callout: {
-                content: city,
-                display: "ALWAYS",
-                padding: 8,
-                borderRadius: 8,
-                fontSize: 13,
-                bgColor: "rgba(255,255,255,0.9)",
-                color: "#b8860b",
-              },
             },
           ],
         });

@@ -114,12 +114,17 @@ public class JobService {
                         }
                     }
             );
+            String msg = "完成：成功 " + result.getSuccessCount()
+                    + "，失败 " + result.getFailCount();
+            if (result.getGeocodeFailCount() > 0) {
+                msg += "，地理编码跳过 " + result.getGeocodeFailCount();
+            }
             finishJob(
                     jobId,
                     JobStatus.completed,
                     result.getSuccessCount(),
                     result.getFailCount(),
-                    "完成：成功 " + result.getSuccessCount() + "，失败 " + result.getFailCount()
+                    msg
             );
         } catch (Exception e) {
             finishJob(jobId, JobStatus.failed, 0, 0, e.getMessage());
