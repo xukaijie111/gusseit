@@ -30,8 +30,28 @@ echo "启动后端 (profile=$PROFILE, port=${PORT:-8787})..."
 echo "日志: $LOG_FILE"
 
 cd "$ROOT/backend"
-nohup mvn -q spring-boot:run -Dspring-boot.run.profiles="$PROFILE" >>"$LOG_FILE" 2>&1 &
-echo $! >"$LOG_DIR/backend.pid"
+# 先构建 jar（如果不存在）
+JAR=$(ls target/*.jar 2>/dev/null | head -1)
+if [[ -z "$JAR" ]]; then
+  echo "构建 jar..."
+  mvn -q package -DskipTests || exit 1
+  JAR=$(ls target/*.jar 2>/dev/null | head -1)
+fi
+
+nohup env \
+  MYSQL_HOST="${MYSQL_HOST:-127.0.0.1}" \
+  MYSQL_PORT="${MYSQL_PORT:-3306}" \
+  MYSQL_USER="${MYSQL_USER:-root}" \
+  MYSQL_PASSWORD="${MYSQL_PASSWORD:-}" \
+  MYSQL_DATABASE="${MYSQL_DATABASE:-guseeit}" \
+  AMAP_WEB_KEY="${AMAP_WEB_KEY:-}" \
+  AMAP_BASE_URL="${AMAP_BASE_URL:-https://restapi.amap.com/v3}" \
+  DOUYIN_APP_ID="${DOUYIN_APP_ID:-}" \
+  DOUYIN_APP_SECRET="${DOUYIN_APP_SECRET:-}" \
+  java -jar "$JAR" >>"$LOG_FILE" 2>&1 &
+BACKEND_PID=$!
+echo $BACKEND_PID >"$LOG_DIR/backend.pid"
+disown $BACKEND_PID 2>/dev/null || true
 
 for i in $(seq 1 60); do
   if curl -sf "http://127.0.0.1:${PORT:-8787}/api/dynasties" >/dev/null 2>&1; then

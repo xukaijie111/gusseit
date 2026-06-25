@@ -8,6 +8,8 @@ public class RoundPromptDto {
     private String dynasty;
     @JsonProperty("location_name")
     private String locationName;
+    @JsonProperty("historical_city")
+    private String historicalCity;
     @JsonProperty("modern_place")
     private String modernPlace;
     @JsonProperty("geo_query")
@@ -28,6 +30,7 @@ public class RoundPromptDto {
         Round round = new Round();
         round.setDynasty(dynasty);
         round.setLocationName(locationName);
+        round.setHistoricalCity(historicalCity);
         round.setModernPlace(modernPlace);
         round.setGeoQuery(geoQuery);
         round.setYearAd(yearAd);
@@ -43,6 +46,8 @@ public class RoundPromptDto {
     public void setDynasty(String dynasty) { this.dynasty = dynasty; }
     public String getLocationName() { return locationName; }
     public void setLocationName(String locationName) { this.locationName = locationName; }
+    public String getHistoricalCity() { return historicalCity; }
+    public void setHistoricalCity(String historicalCity) { this.historicalCity = historicalCity; }
     public String getModernPlace() { return modernPlace; }
     public void setModernPlace(String modernPlace) { this.modernPlace = modernPlace; }
     public String getGeoQuery() { return geoQuery; }

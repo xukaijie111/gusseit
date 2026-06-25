@@ -26,6 +26,9 @@ public class Round {
     @Column(name = "location_name", nullable = false, length = 128)
     private String locationName;
 
+    @Column(name = "historical_city", length = 64)
+    private String historicalCity;
+
     @Column(name = "modern_place", length = 128)
     private String modernPlace;
 
@@ -109,6 +112,14 @@ public class Round {
 
     public void setLocationName(String locationName) {
         this.locationName = locationName;
+    }
+
+    public String getHistoricalCity() {
+        return historicalCity;
+    }
+
+    public void setHistoricalCity(String historicalCity) {
+        this.historicalCity = historicalCity;
     }
 
     public String getModernPlace() {

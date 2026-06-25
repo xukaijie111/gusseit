@@ -6,7 +6,12 @@ import com.guseeit.config.GuseeitProperties;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Component
@@ -55,10 +60,44 @@ public class GeocodeClient {
 
     /** 按现代地名解析城市中心（计分答案侧统一走此入口） */
     public CityPoint resolveModernCity(String modernPlace) {
-        if (modernPlace == null || modernPlace.trim().isEmpty()) {
+        return resolveCityCenter(modernPlace);
+    }
+
+    /**
+     * 解析城市中心坐标，依次尝试多种查询词（含 modern_place / 城市名 / 带市后缀）。
+     */
+    public CityPoint resolveCityCenter(String cityLabel) {
+        if (cityLabel == null || cityLabel.trim().isEmpty()) {
             return null;
         }
-        return resolveCity(null, modernPlace.trim());
+        String displayName = formatCityLabel(cityLabel.trim());
+        for (String query : buildCityQueries(cityLabel.trim())) {
+            CityPoint cached = cityCache.get(query);
+            if (cached != null) {
+                return new CityPoint(displayName, cached.getLatitude(), cached.getLongitude());
+            }
+            double[] coords = forwardSearch(query);
+            if (coords == null) {
+                coords = forwardSearchDistrict(query);
+            }
+            if (coords != null) {
+                CityPoint city = new CityPoint(displayName, coords[0], coords[1]);
+                cityCache.put(query, city);
+                return city;
+            }
+        }
+        return null;
+    }
+
+    private static String[] buildCityQueries(String label) {
+        String formatted = formatCityLabel(label);
+        java.util.LinkedHashSet<String> queries = new java.util.LinkedHashSet<String>();
+        queries.add(formatted);
+        queries.add(label.trim());
+        if (formatted.endsWith("市")) {
+            queries.add(formatted.substring(0, formatted.length() - 1));
+        }
+        return queries.toArray(new String[0]);
     }
 
     public CityPoint reverseCity(double latitude, double longitude) {
@@ -78,7 +117,7 @@ public class GeocodeClient {
         }
 
         String label = formatCityLabel(name);
-        CityPoint center = resolveCity(null, label);
+        CityPoint center = resolveCityCenter(label);
         CityPoint result = center != null ? center : new CityPoint(label, latitude, longitude);
         reverseCache.put(cacheKey, result);
         return result;
@@ -195,12 +234,16 @@ public class GeocodeClient {
             String url = base + "/geocode/geo?key=" + amap.getKey()
                     + "&address=" + encode(query);
 
-            JsonNode root = objectMapper.readTree(restTemplate.getForObject(url, String.class));
-            if (!"1".equals(root.path("status").asText())) {
+            JsonNode root = objectMapper.readTree(httpGet(url));
+            String status = root.path("status").asText("");
+            if (!"1".equals(status)) {
                 return null;
             }
 
             JsonNode geocodes = root.path("geocodes");
+            if (!geocodes.isArray() || geocodes.size() == 0) {
+                return null;
+            }
             JsonNode best = pickCityLevelGeocode(geocodes);
             if (best == null) {
                 return null;
@@ -217,6 +260,37 @@ public class GeocodeClient {
             double[] coords = new double[]{lat, lng};
             forwardCache.put(query, coords);
             return coords;
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    /** 行政区划 API 兜底，获取城市中心点 */
+    private double[] forwardSearchDistrict(String keyword) {
+        if (!hasAmapKey()) {
+            return null;
+        }
+        try {
+            String base = amap.getBaseUrl().replaceAll("/$", "");
+            String url = base + "/config/district?keywords=" + encode(keyword)
+                    + "&subdistrict=0&extensions=base&key=" + amap.getKey();
+
+            JsonNode root = objectMapper.readTree(httpGet(url));
+            if (!"1".equals(root.path("status").asText())) {
+                return null;
+            }
+            JsonNode districts = root.path("districts");
+            if (!districts.isArray() || districts.size() == 0) {
+                return null;
+            }
+            String center = districts.get(0).path("center").asText("");
+            if (center.isEmpty() || !center.contains(",")) {
+                return null;
+            }
+            String[] parts = center.split(",");
+            double lng = Double.parseDouble(parts[0].trim());
+            double lat = Double.parseDouble(parts[1].trim());
+            return new double[]{lat, lng};
         } catch (Exception e) {
             return null;
         }
@@ -262,6 +336,26 @@ public class GeocodeClient {
         } catch (Exception e) {
             return value;
         }
+    }
+
+    private String httpGet(String urlStr) throws Exception {
+        URL url = new URL(urlStr);
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        conn.setConnectTimeout(8000);
+        conn.setReadTimeout(8000);
+        conn.setRequestMethod("GET");
+        int code = conn.getResponseCode();
+        InputStream in = code >= 400 ? conn.getErrorStream() : conn.getInputStream();
+        if (in == null) {
+            return "";
+        }
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        byte[] buf = new byte[4096];
+        int n;
+        while ((n = in.read(buf)) >= 0) {
+            out.write(buf, 0, n);
+        }
+        return new String(out.toByteArray(), StandardCharsets.UTF_8);
     }
 
     public static final class CityPoint {

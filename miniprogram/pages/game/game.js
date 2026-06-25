@@ -2,14 +2,63 @@ const api = require("../../utils/api.js");
 const timeline = require("../../utils/timeline.js");
 const dynasties = require("../../utils/dynasties.js");
 
-function computeResultMapScale(distanceKm) {
-  // 城市级视野：最近约 scale 6（~50km），避免缩放到街道/村级
-  var viewKm = Math.max(55, (distanceKm || 0) * 1.35);
-  if (viewKm <= 70) return 6;
-  if (viewKm <= 180) return 5;
-  if (viewKm <= 450) return 4;
-  if (viewKm <= 1000) return 3;
-  return 2;
+function formatModernCityLabel(name) {
+  if (!name) return "";
+  var s = String(name).trim();
+  if (!s) return "";
+  if (s.indexOf("(今") === 0) return s;
+  return "(今" + s + ")";
+}
+
+function formatAnswerLegendLabel(historicalCity, modernPlace) {
+  var city = (historicalCity || "").trim();
+  var modern = formatModernCityLabel(modernPlace || "");
+  if (city && modern) return city + modern;
+  if (city) return city;
+  if (modern) return modern;
+  return "";
+}
+
+function isValidCoord(lat, lng) {
+  return (
+    !isNaN(lat) &&
+    !isNaN(lng) &&
+    Math.abs(lat) <= 90 &&
+    Math.abs(lng) <= 180
+  );
+}
+
+function computeResultMapScale(gLat, gLng, aLat, aLng, distanceKm) {
+  if (
+    !isValidCoord(gLat, gLng) ||
+    !isValidCoord(aLat, aLng)
+  ) {
+    return 12;
+  }
+
+  var latMid = (gLat + aLat) / 2;
+  var latRad = (latMid * Math.PI) / 180;
+  var latSpan = Math.abs(gLat - aLat);
+  var lngSpan = Math.abs(gLng - aLng) * Math.cos(latRad);
+  var spanDeg = Math.max(latSpan, lngSpan, 0.0001);
+
+  // 留边距，保证 marker + 连线都在可视范围内
+  var paddedKm = Math.max(
+    (Number(distanceKm) || 0) * 1.6,
+    spanDeg * 111 * 1.85
+  );
+
+  // scale 越大越近；距离远则缩小 scale
+  if (paddedKm <= 3) return 14;
+  if (paddedKm <= 8) return 13;
+  if (paddedKm <= 20) return 12;
+  if (paddedKm <= 45) return 11;
+  if (paddedKm <= 90) return 10;
+  if (paddedKm <= 180) return 9;
+  if (paddedKm <= 350) return 8;
+  if (paddedKm <= 700) return 7;
+  if (paddedKm <= 1400) return 6;
+  return 5;
 }
 
 function buildResultMapState(result) {
@@ -18,11 +67,17 @@ function buildResultMapState(result) {
   var aLat = Number(result.answerLatitude);
   var aLng = Number(result.answerLongitude);
   var distance = Number(result.distanceKm) || 0;
+  var hasGuess = isValidCoord(gLat, gLng);
   var hasAnswer =
-    !isNaN(aLat) && !isNaN(aLng) && result.answerLatitude != null;
+    result.answerLatitude != null &&
+    result.answerLongitude != null &&
+    isValidCoord(aLat, aLng);
+  var hasLine = hasGuess && hasAnswer;
   var polyline = [];
-  var markers = [
-    {
+  var markers = [];
+
+  if (hasGuess) {
+    markers.push({
       id: 1,
       latitude: gLat,
       longitude: gLng,
@@ -39,8 +94,8 @@ function buildResultMapState(result) {
         anchorX: 0,
         anchorY: -36,
       },
-    },
-  ];
+    });
+  }
 
   if (hasAnswer) {
     markers.push({
@@ -61,28 +116,51 @@ function buildResultMapState(result) {
         anchorY: -36,
       },
     });
+  }
+
+  if (hasLine) {
     polyline = [
       {
         points: [
           { latitude: gLat, longitude: gLng },
           { latitude: aLat, longitude: aLng },
         ],
-        color: "#1a1a1a",
-        width: 4,
+        color: "#1a1a1aFF",
+        width: 8,
         dottedLine: true,
         arrowLine: false,
       },
     ];
   }
 
+  var distanceLabel =
+    distance > 0.1 ? Math.round(distance * 10) / 10 + " km" : "";
+
   return {
-    resultMapLat: hasAnswer ? (gLat + aLat) / 2 : gLat,
-    resultMapLng: hasAnswer ? (gLng + aLng) / 2 : gLng,
-    resultMapScale: computeResultMapScale(distance),
+    resultMapLat: hasLine
+      ? (gLat + aLat) / 2
+      : hasGuess
+        ? gLat
+        : hasAnswer
+          ? aLat
+          : 35,
+    resultMapLng: hasLine
+      ? (gLng + aLng) / 2
+      : hasGuess
+        ? gLng
+        : hasAnswer
+          ? aLng
+          : 105,
+    resultMapScale: computeResultMapScale(
+      gLat,
+      gLng,
+      aLat,
+      aLng,
+      distance
+    ),
     resultMarkers: markers,
     resultPolyline: polyline,
-    resultDistanceLabel: distance > 0.1 ? distance + " km" : "同城",
-    resultMapKey: "map-" + Date.now(),
+    resultDistanceLabel: distanceLabel,
   };
 }
 
@@ -90,8 +168,9 @@ Page({
   data: {
     roundIndex: 0,
     round: {},
-    mapLat: 35.0,
-    mapLng: 105.0,
+    mapLat: 39.9,
+    mapLng: 116.4,
+    pickMapScale: 9,
     pickLat: 0,
     pickLng: 0,
     markers: [],
@@ -122,13 +201,15 @@ Page({
     resultAnswerDynastyTitle: "",
     resultGuessCity: "",
     resultAnswerCity: "",
+    resultAnswerCityLabel: "",
+    resultAnswerLegendText: "",
     resultDynastyOk: false,
     resultAnswerLocation: "",
     resultAnswerTime: "",
     resultNextLabel: "下一题",
     resultMapLat: 35,
     resultMapLng: 105,
-    resultMapScale: 5,
+    resultMapScale: 12,
     resultMapKey: "",
     resultMarkers: [],
     resultPolyline: [],
@@ -179,17 +260,23 @@ Page({
 
   expandMap: function () {
     if (this.data.resultVisible) return;
-    var patch = { mapExpanded: true };
+    var lat =
+      this.data.pickLat && this.data.pickLng ? this.data.pickLat : 35.0;
+    var lng =
+      this.data.pickLat && this.data.pickLng ? this.data.pickLng : 105.0;
     if (!this._mapViewReady) {
-      patch.mapLat = 35.0;
-      patch.mapLng = 105.0;
       this._mapViewReady = true;
     }
-    this.setData(patch);
+    this.setData({
+      mapExpanded: true,
+      mapLat: lat,
+      mapLng: lng,
+      pickMapScale: 9,
+    });
   },
 
   collapseMap: function () {
-    var patch = { mapExpanded: false };
+    var patch = { mapExpanded: false, pickMapScale: 9 };
     if (this.data.picked && this.data.pickLat && this.data.pickLng) {
       patch.mapLat = this.data.pickLat;
       patch.mapLng = this.data.pickLng;
@@ -209,6 +296,9 @@ Page({
     this.setData({
       pickLat: lat,
       pickLng: lng,
+      mapLat: lat,
+      mapLng: lng,
+      pickMapScale: 9,
       picked: false,
       pickedCity: "",
       cityResolving: true,
@@ -240,6 +330,7 @@ Page({
           picked: true,
           pickedCity: city,
           cityResolving: false,
+          pickMapScale: 9,
           markers: [
             {
               id: 1,
@@ -319,6 +410,14 @@ Page({
           resultAnswerDynastyTitle: dynasties.titleOf(result.answerDynasty),
           resultGuessCity: result.guessCity || "",
           resultAnswerCity: result.answerCity || "",
+          resultAnswerCityLabel: formatModernCityLabel(
+            (answer.modernPlace || result.answerCity || "").trim()
+          ),
+          resultAnswerLegendText: formatAnswerLegendLabel(
+            answer.historicalCityName ||
+              (answer.modernPlace || "").replace(/市$/, ""),
+            answer.modernPlace
+          ),
           resultDynastyOk: result.dynastyScore === 100,
           resultAnswerLocation: answer.locationName || "",
           resultEventTime: answer.timeLabel || "",
@@ -328,39 +427,30 @@ Page({
           resultKnowledgeImage: this.data.round.imageUrl || "",
           resultBaikeUrl: answer.baikeUrl || "",
           resultNextLabel: isLast ? "查看总成绩" : "下一题",
-          resultPolyline: [],
+          resultPolyline: mapState.resultPolyline,
           resultMapLat: mapState.resultMapLat,
           resultMapLng: mapState.resultMapLng,
           resultMapScale: mapState.resultMapScale,
           resultMarkers: mapState.resultMarkers,
           resultDistanceLabel: mapState.resultDistanceLabel,
-          resultMapKey: mapState.resultMapKey,
         },
         {}
       )
     );
 
     setTimeout(function () {
-      self._pendingResultPolyline = mapState.resultPolyline;
-      self.setData({
-        resultPolyline: mapState.resultPolyline,
-        resultSheetShow: true,
-      });
-    }, 350);
+      self.setData({ resultSheetShow: true });
+    }, 300);
   },
 
-  onResultMapUpdated: function () {
-    var pending = this._pendingResultPolyline;
-    if (!pending || !pending.length) return;
-    if (this.data.resultPolyline && this.data.resultPolyline.length) {
-      this._pendingResultPolyline = null;
-      return;
+  onResultSheetPreviewImage: function (e) {
+    var url = e.detail.url;
+    if (url) {
+      tt.previewImage({ urls: [url] });
     }
-    this.setData({ resultPolyline: pending });
-    this._pendingResultPolyline = null;
   },
 
-  onOpenBaike: function () {
+  onResultSheetOpenBaike: function () {
     var url = this.data.resultBaikeUrl;
     if (!url) return;
     tt.setClipboardData({
@@ -372,16 +462,6 @@ Page({
   },
 
   onSubmit: function () {
-    if (
-      this.data.submitting ||
-      !this.data.picked ||
-      this.data.cityResolving ||
-      this.data.resultVisible
-    ) {
-      return;
-    }
-
-    this.setData({ submitting: true, mapExpanded: false });
     var self = this;
     var round = this.data.round;
 
@@ -391,6 +471,7 @@ Page({
         yearAd: this.data.yearAd,
         latitude: this.data.pickLat,
         longitude: this.data.pickLng,
+        token: getApp().getToken(),
       })
       .then(function (result) {
         var app = getApp();

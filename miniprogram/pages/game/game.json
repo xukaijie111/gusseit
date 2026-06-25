@@ -3,5 +3,8 @@
   "navigationBarBackgroundColor": "#000000",
   "navigationBarTextStyle": "white",
   "navigationStyle": "default",
-  "disableScroll": true
+  "disableScroll": true,
+  "usingComponents": {
+    "result-sheet": "/components/result-sheet/result-sheet"
+  }
 }

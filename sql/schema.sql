@@ -4,8 +4,9 @@ USE guseeit;
 CREATE TABLE IF NOT EXISTS rounds (
   id CHAR(36) PRIMARY KEY,
   dynasty VARCHAR(16) NOT NULL COMMENT '朝代',
-  location_name VARCHAR(128) NOT NULL COMMENT '历史地名',
-  modern_place VARCHAR(128) NULL COMMENT '今地名',
+  location_name VARCHAR(128) NOT NULL COMMENT '历史场景地点（具体地名）',
+  historical_city VARCHAR(64) NULL COMMENT '历史城市名（如长安、洛阳）',
+  modern_place VARCHAR(128) NULL COMMENT '现代城市名（如西安市、洛阳市）',
   geo_query VARCHAR(64) NULL COMMENT '地理编码查询词',
   year_ad INT NOT NULL COMMENT '公元年，公元前为负',
   reign_label VARCHAR(64) NULL COMMENT '年号纪年',

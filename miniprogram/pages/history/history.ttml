@@ -1,0 +1,75 @@
+<view class="page">
+  <scroll-view
+    class="scroller {{moreLoading ? 'scroller--loading' : ''}}"
+    scroll-y="{{true}}"
+    bindscrolltolower="onScrollToLower"
+    lower-threshold="300"
+  >
+    <block wx:for="{{sections}}" wx:key="label">
+      <view class="section-divider">
+        <text class="section-divider-text">{{item.label}}</text>
+      </view>
+
+      <view class="waterfall">
+        <view
+          class="card"
+          wx:for="{{item.rows}}"
+          wx:for-item="r"
+          wx:key="id"
+          data-index="{{index}}"
+          data-section="{{outerIndex}}"
+          bindtap="onTapCard"
+        >
+          <image class="card-img" src="{{r.imageUrl}}" mode="aspectFill" lazy-load="{{true}}" />
+          <view class="card-overlay">
+            <view class="card-badge">
+              <text class="card-score">{{r.totalScore}}分</text>
+            </view>
+            <text class="card-place">{{r.locationName || r.answerCity}}</text>
+            <text class="card-meta">{{r.answerDynastyTitle}} · {{r.answerYear}}年</text>
+          </view>
+        </view>
+      </view>
+    </block>
+
+    <view class="more" wx:if="{{moreLoading}}">
+      <text class="more-text">加载中…</text>
+    </view>
+    <view class="more more--end" wx:if="{{!hasMore && sections.length > 0}}">
+      <text class="more-text">— 已全部加载 —</text>
+    </view>
+
+    <view class="empty" wx:if="{{!loading && sections.length === 0}}">
+      <text class="empty-text">暂无答题记录</text>
+      <text class="empty-sub">去首页开始答题吧</text>
+    </view>
+
+    <view class="loading-init" wx:if="{{loading}}">
+      <text class="loading-init-text">加载中…</text>
+    </view>
+  </scroll-view>
+
+  <result-sheet
+    visible="{{sheetData ? true : false}}"
+    show="{{sheetVisible}}"
+    mapId="historyResultMap"
+    mapLat="{{sheetMapLat}}"
+    mapLng="{{sheetMapLng}}"
+    mapScale="{{sheetMapScale}}"
+    markers="{{sheetMarkers}}"
+    polyline="{{sheetPolyline}}"
+    guessCity="{{sheetData.guessCity}}"
+    answerLabel="{{sheetAnswerLabel}}"
+    distanceLabel="{{sheetDistanceLabel}}"
+    dynastyScore="{{sheetData.dynastyScore}}"
+    geoScore="{{sheetData.geoScore}}"
+    totalScore="{{sheetData.totalScore}}"
+    eventTitle="{{sheetAnecdoteTitle || sheetLocation}}"
+    eventTime="{{sheetData.timeLabel}}"
+    knowledgeText="{{sheetKnowledge}}"
+    knowledgeImage="{{sheetData.imageUrl}}"
+    showClose="{{true}}"
+    bind:previewimage="onPreviewSheetImage"
+    bind:close="onCloseSheet"
+  />
+</view>

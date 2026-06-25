@@ -77,6 +77,7 @@ public class GuessResultView {
         private Integer yearAd;
         private String knowledgeSummary;
         private String anecdoteTitle;
+        private String historicalCityName;
         private String baikeUrl;
 
         public String getDynasty() { return dynasty; }
@@ -93,6 +94,8 @@ public class GuessResultView {
         public void setKnowledgeSummary(String knowledgeSummary) { this.knowledgeSummary = knowledgeSummary; }
         public String getAnecdoteTitle() { return anecdoteTitle; }
         public void setAnecdoteTitle(String anecdoteTitle) { this.anecdoteTitle = anecdoteTitle; }
+        public String getHistoricalCityName() { return historicalCityName; }
+        public void setHistoricalCityName(String historicalCityName) { this.historicalCityName = historicalCityName; }
         public String getBaikeUrl() { return baikeUrl; }
         public void setBaikeUrl(String baikeUrl) { this.baikeUrl = baikeUrl; }
     }

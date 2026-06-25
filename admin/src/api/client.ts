@@ -2,6 +2,7 @@ export interface Round {
   id: string;
   dynasty: string;
   locationName: string;
+  historicalCity: string | null;
   modernPlace: string | null;
   geoQuery: string | null;
   yearAd: number | null;

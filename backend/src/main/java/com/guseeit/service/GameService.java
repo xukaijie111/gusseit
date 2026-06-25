@@ -19,19 +19,26 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 @Service
 public class GameService {
 
     private final RoundRepository roundRepository;
     private final GeocodeClient geocodeClient;
+    private final UserService userService;
+    private final UserHistoryService historyService;
 
-    public GameService(RoundRepository roundRepository, GeocodeClient geocodeClient) {
+    public GameService(RoundRepository roundRepository, GeocodeClient geocodeClient,
+                       UserService userService, UserHistoryService historyService) {
         this.roundRepository = roundRepository;
         this.geocodeClient = geocodeClient;
+        this.userService = userService;
+        this.historyService = historyService;
     }
 
     public Map<String, String> lookupCity(double latitude, double longitude) {
@@ -41,7 +48,22 @@ public class GameService {
         return result;
     }
 
-    public List<GameRoundView> createSession(String dynasty, String era, int count) {
+    public Map<String, Object> lookupCityCenter(String city) {
+        CityPoint point = geocodeClient.resolveCityCenter(city);
+        Map<String, Object> result = new LinkedHashMap<String, Object>();
+        if (point == null) {
+            result.put("city", city);
+            result.put("latitude", null);
+            result.put("longitude", null);
+            return result;
+        }
+        result.put("city", point.getName());
+        result.put("latitude", point.getLatitude());
+        result.put("longitude", point.getLongitude());
+        return result;
+    }
+
+    public List<GameRoundView> createSession(String dynasty, String era, int count, String token) {
         int size = Math.min(Math.max(count, 1), 10);
         Pageable pageable = PageRequest.of(0, 100, Sort.by(Sort.Direction.DESC, "createdAt"));
 
@@ -62,6 +84,17 @@ public class GameService {
         }
 
         pool.removeIf(r -> r.getImageUrl() == null || r.getImageUrl().trim().isEmpty());
+
+        // 排除用户已答过的题目
+        Long userId = userService.resolveUserId(token);
+        if (userId != null) {
+            List<String> answered = historyService.answeredRoundIds(userId);
+            if (!answered.isEmpty()) {
+                Set<String> answeredSet = new HashSet<>(answered);
+                pool.removeIf(r -> answeredSet.contains(r.getId()));
+            }
+        }
+
         if (pool.isEmpty()) {
             throw new IllegalStateException("暂无可用题目，请先在管理端生成图片");
         }
@@ -84,21 +117,23 @@ public class GameService {
             throw new IllegalArgumentException("该题目不可作答");
         }
 
-        CityPoint guessCity = geocodeClient.reverseCity(request.getLatitude(), request.getLongitude());
-        CityPoint answerCity = geocodeClient.resolveModernCity(round.getModernPlace());
-        if (answerCity == null && round.getGeoQuery() != null && !round.getGeoQuery().trim().isEmpty()) {
-            answerCity = geocodeClient.resolveCity(round.getGeoQuery(), null);
+        CityPoint guessReverse = geocodeClient.reverseCity(request.getLatitude(), request.getLongitude());
+        String guessCityName = guessReverse.getName();
+
+        CityPoint guessCenter = geocodeClient.resolveCityCenter(guessCityName);
+        if (guessCenter == null) {
+            guessCenter = guessReverse;
         }
+
+        CityPoint answerCenter = resolveAnswerCenter(round);
+        String answerCityName = answerCenter != null
+                ? answerCenter.getName()
+                : GeocodeClient.formatCityLabel(round.getModernPlace());
 
         int dynastyScore = ScoreCalculator.dynastyScore(
                 TimelineConstants.dynastyAt(request.getYearAd()),
                 round.getDynasty()
         );
-
-        String guessCityName = guessCity.getName();
-        String answerCityName = answerCity != null
-                ? answerCity.getName()
-                : GeocodeClient.formatCityLabel(round.getModernPlace());
 
         boolean cityMatch = GeocodeClient.sameCity(guessCityName, answerCityName)
                 || GeocodeClient.sameCity(guessCityName, round.getModernPlace());
@@ -108,10 +143,10 @@ public class GameService {
         if (cityMatch) {
             distanceKm = 0;
             geoScore = 100;
-        } else if (answerCity != null) {
+        } else if (guessCenter != null && answerCenter != null) {
             distanceKm = ScoreCalculator.haversineKm(
-                    guessCity.getLatitude(), guessCity.getLongitude(),
-                    answerCity.getLatitude(), answerCity.getLongitude()
+                    guessCenter.getLatitude(), guessCenter.getLongitude(),
+                    answerCenter.getLatitude(), answerCenter.getLongitude()
             );
             geoScore = ScoreCalculator.geoScore(distanceKm);
         }
@@ -125,11 +160,12 @@ public class GameService {
         answer.setKnowledgeSummary(KnowledgeSummaryHelper.resolve(round));
         answer.setAnecdoteTitle(KnowledgeSummaryHelper.anecdoteTitle(round));
         answer.setBaikeUrl(KnowledgeSummaryHelper.baikeSearchUrl(round));
+        answer.setHistoricalCityName(KnowledgeSummaryHelper.historicalCityName(round));
 
-        Double answerLat = answerCity != null ? answerCity.getLatitude() : null;
-        Double answerLng = answerCity != null ? answerCity.getLongitude() : null;
+        Double answerLat = answerCenter != null ? answerCenter.getLatitude() : null;
+        Double answerLng = answerCenter != null ? answerCenter.getLongitude() : null;
 
-        return GuessResultView.create(
+        GuessResultView result = GuessResultView.create(
                 dynastyScore,
                 geoScore,
                 distanceKm,
@@ -139,11 +175,42 @@ public class GameService {
                 round.getYearAd(),
                 guessCityName,
                 answerCityName,
-                guessCity.getLatitude(),
-                guessCity.getLongitude(),
+                guessCenter.getLatitude(),
+                guessCenter.getLongitude(),
                 answerLat,
                 answerLng,
                 answer
         );
+
+        // 已登录用户保存答题记录
+        Long userId = userService.resolveUserId(request.getToken());
+        if (userId != null) {
+            try {
+                historyService.save(userId, result, round.getId(), round.getImageUrl());
+            } catch (Exception ignored) {
+            }
+        }
+
+        return result;
+    }
+
+    private CityPoint resolveAnswerCenter(Round round) {
+        CityPoint center = geocodeClient.resolveCityCenter(round.getModernPlace());
+        if (center != null) {
+            return center;
+        }
+        if (round.getGeoQuery() != null && !round.getGeoQuery().trim().isEmpty()) {
+            center = geocodeClient.resolveCityCenter(round.getGeoQuery());
+            if (center != null) {
+                return center;
+            }
+        }
+        if (round.getHistoricalCity() != null && !round.getHistoricalCity().trim().isEmpty()) {
+            center = geocodeClient.resolveCityCenter(round.getHistoricalCity() + "市");
+            if (center != null) {
+                return center;
+            }
+        }
+        return geocodeClient.resolveCity(round.getGeoQuery(), round.getModernPlace());
     }
 }

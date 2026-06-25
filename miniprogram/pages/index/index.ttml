@@ -18,8 +18,7 @@
     <text class="subtitle">一张图，猜地点，猜年代</text>
     <view class="selected-hint">
       <text class="hint-label">即将入卷</text>
-      <text class="hint-value">{{selectedEraTitle || '滑动选择时代'}} · {{countOptions[countIndex]}} 题</text>
-      <text class="hint-sub" wx:if="{{selectedEraSubtitle}}">{{selectedEraSubtitle}}</text>
+      <text class="hint-value">{{countOptions[countIndex]}} 题</text>
     </view>
   </view>
 
@@ -37,43 +36,8 @@
     </view>
 
     <button class="start-fab" loading="{{loading}}" bindtap="onStart">入卷</button>
-
-    <view class="ruler-dock">
-      <view class="ruler-pointer"></view>
-      <scroll-view
-        class="ruler-scroll"
-        scroll-x="{{true}}"
-        scroll-left="{{scrollLeft}}"
-        bindscroll="onRulerScroll"
-        bindtouchend="onRulerTouchEnd"
-        show-scrollbar="{{false}}"
-      >
-        <view class="ruler-inner" style="width: {{rulerTotalWidth}}px;">
-          <view class="ruler-track" style="width: {{rulerInnerWidth}}px; margin-left: {{sidePad}}px;">
-            <view class="ruler-dynasty-row">
-              <view
-                wx:for="{{eraSegments}}"
-                wx:key="name"
-                class="dynasty-mark"
-                style="left: {{item.left}}px; width: {{item.width}}px;"
-              >
-                <text>{{item.name}}</text>
-              </view>
-            </view>
-            <view class="ruler-ticks-row">
-              <view
-                wx:for="{{rulerTicks}}"
-                wx:key="year"
-                class="scale-tick scale-tick-{{item.size}}"
-                style="left: {{item.left}}px;"
-              >
-                <view class="scale-tick-line"></view>
-                <text wx:if="{{item.label}}" class="scale-tick-label">{{item.label}}</text>
-              </view>
-            </view>
-          </view>
-        </view>
-      </scroll-view>
+    <view class="history-link" bindtap="onHistory">
+      <text class="history-link-text">我的记录</text>
     </view>
   </view>
 </view>

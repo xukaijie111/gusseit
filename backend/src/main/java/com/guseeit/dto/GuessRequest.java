@@ -25,6 +25,8 @@ public class GuessRequest {
     @Max(180)
     private Double longitude;
 
+    private String token;
+
     public String getRoundId() { return roundId; }
     public void setRoundId(String roundId) { this.roundId = roundId; }
     public Integer getYearAd() { return yearAd; }
@@ -33,4 +35,6 @@ public class GuessRequest {
     public void setLatitude(Double latitude) { this.latitude = latitude; }
     public Double getLongitude() { return longitude; }
     public void setLongitude(Double longitude) { this.longitude = longitude; }
+    public String getToken() { return token; }
+    public void setToken(String token) { this.token = token; }
 }

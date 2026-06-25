@@ -1,0 +1,8 @@
+{
+  "navigationBarTitleText": "我的记录",
+  "navigationBarBackgroundColor": "#0f0f0f",
+  "navigationBarTextStyle": "white",
+  "usingComponents": {
+    "result-sheet": "/components/result-sheet/result-sheet"
+  }
+}

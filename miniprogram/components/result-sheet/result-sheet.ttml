@@ -1,0 +1,80 @@
+<view class="result-overlay {{show ? 'result-overlay--show' : ''}}" wx:if="{{visible}}" catchtouchmove="noop">
+  <view class="result-map-panel">
+    <map
+      id="{{mapId}}"
+      class="result-map"
+      latitude="{{mapLat}}"
+      longitude="{{mapLng}}"
+      scale="{{mapScale}}"
+      markers="{{markers}}"
+      polyline="{{polyline}}"
+      enable-scroll="{{true}}"
+      enable-zoom="{{true}}"
+      show-scale="{{true}}"
+      enable-poi="{{true}}"
+    />
+    <view class="result-map-legend">
+      <view class="legend-item">
+        <view class="legend-dot legend-dot--you"></view>
+        <text>你 · {{guessCity}}</text>
+      </view>
+      <view class="legend-item" wx:if="{{answerLabel}}">
+        <view class="legend-dot legend-dot--ans"></view>
+        <text>答：{{answerLabel}}</text>
+      </view>
+    </view>
+    <view class="result-close-btn" wx:if="{{showClose}}" bindtap="onClose">
+      <text class="result-close-icon">✕</text>
+    </view>
+  </view>
+
+  <view class="result-sheet {{show ? 'result-sheet--show' : ''}}">
+    <view class="result-sheet-handle"></view>
+
+    <view class="result-stats-row">
+      <view class="result-stat" wx:if="{{distanceLabel}}">
+        <text class="result-stat-label">距离误差</text>
+        <text class="result-stat-value">{{distanceLabel}}</text>
+      </view>
+      <view class="result-stat">
+        <text class="result-stat-label">朝代</text>
+        <text class="result-stat-value">{{dynastyScore}}</text>
+      </view>
+      <view class="result-stat">
+        <text class="result-stat-label">地理</text>
+        <text class="result-stat-value">{{geoScore}}</text>
+      </view>
+      <view class="result-stat result-stat--total">
+        <text class="result-stat-label">总分</text>
+        <text class="result-stat-value">{{totalScore}}</text>
+      </view>
+    </view>
+
+    <view class="result-event-bar" wx:if="{{eventTitle || eventTime}}">
+      <text class="result-event-name">{{eventTitle}}</text>
+      <text class="result-event-time">{{eventTime}}</text>
+    </view>
+
+    <scroll-view class="result-sheet-scroll" scroll-y="{{true}}">
+      <view class="result-knowledge" wx:if="{{knowledgeText}}">
+        <image
+          class="result-knowledge-img"
+          wx:if="{{knowledgeImage}}"
+          src="{{knowledgeImage}}"
+          mode="aspectFill"
+          bindtap="onPreviewImage"
+        />
+        <view class="result-knowledge-body">
+          <text class="result-knowledge-title">{{knowledgeTitle || '历史典故'}}</text>
+          <text class="result-knowledge-text">{{knowledgeText}}</text>
+          <view class="result-knowledge-foot">
+            <text class="result-knowledge-src">历史典故 · 本题场景</text>
+            <text class="result-baike-link" wx:if="{{showBaike && baikeUrl}}" bindtap="onOpenBaike">百度百科 ↗</text>
+          </view>
+        </view>
+      </view>
+    </scroll-view>
+
+    <button class="result-next-btn" wx:if="{{nextLabel}}" bindtap="onNext">{{nextLabel}}</button>
+  </view>
+</view>

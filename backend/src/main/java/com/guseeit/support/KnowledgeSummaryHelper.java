@@ -43,6 +43,22 @@ public final class KnowledgeSummaryHelper {
         return round.getLocationName() != null ? round.getLocationName().trim() : "";
     }
 
+    /** 历史城市名（答题展示用），优先取千问生成的 historical_city */
+    public static String historicalCityName(Round round) {
+        if (round.getHistoricalCity() != null && !round.getHistoricalCity().trim().isEmpty()) {
+            return round.getHistoricalCity().trim();
+        }
+        String modern = round.getModernPlace();
+        if (modern == null || modern.trim().isEmpty()) {
+            return "";
+        }
+        String s = modern.trim();
+        if (s.endsWith("市")) {
+            return s.substring(0, s.length() - 1);
+        }
+        return s;
+    }
+
     public static String baikeSearchUrl(Round round) {
         String keyword = round.getSceneType();
         if (keyword == null || keyword.trim().isEmpty()) {

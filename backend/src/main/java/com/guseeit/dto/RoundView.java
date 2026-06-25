@@ -10,6 +10,7 @@ public class RoundView {
     private String id;
     private String dynasty;
     private String locationName;
+    private String historicalCity;
     private String modernPlace;
     private String geoQuery;
     private Integer yearAd;
@@ -31,6 +32,7 @@ public class RoundView {
         view.id = round.getId();
         view.dynasty = round.getDynasty();
         view.locationName = round.getLocationName();
+        view.historicalCity = round.getHistoricalCity();
         view.modernPlace = round.getModernPlace();
         view.geoQuery = round.getGeoQuery();
         view.yearAd = round.getYearAd();
@@ -52,6 +54,7 @@ public class RoundView {
     public String getId() { return id; }
     public String getDynasty() { return dynasty; }
     public String getLocationName() { return locationName; }
+    public String getHistoricalCity() { return historicalCity; }
     public String getModernPlace() { return modernPlace; }
     public String getGeoQuery() { return geoQuery; }
     public Integer getYearAd() { return yearAd; }

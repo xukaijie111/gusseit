@@ -41,9 +41,10 @@ public class GameController {
     public Map<String, Object> session(
             @RequestParam(required = false) String dynasty,
             @RequestParam(required = false) String era,
-            @RequestParam(defaultValue = "5") int count
+            @RequestParam(defaultValue = "5") int count,
+            @RequestParam(required = false) String token
     ) {
-        List<GameRoundView> rounds = gameService.createSession(dynasty, era, count);
+        List<GameRoundView> rounds = gameService.createSession(dynasty, era, count, token);
         Map<String, Object> result = new LinkedHashMap<String, Object>();
         result.put("rounds", rounds);
         result.put("total", rounds.size());
@@ -61,5 +62,10 @@ public class GameController {
             @RequestParam double longitude
     ) {
         return gameService.lookupCity(latitude, longitude);
+    }
+
+    @GetMapping("/city-center")
+    public Map<String, Object> cityCenter(@RequestParam String city) {
+        return gameService.lookupCityCenter(city);
     }
 }

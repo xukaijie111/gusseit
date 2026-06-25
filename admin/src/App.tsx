@@ -53,9 +53,15 @@ function RoundDetailSheet({
           )}
 
           <dl className="meta-list">
+            {round.historicalCity && (
+              <>
+                <dt>历史城市</dt>
+                <dd>{round.historicalCity}</dd>
+              </>
+            )}
             {round.modernPlace && (
               <>
-                <dt>今地名</dt>
+                <dt>现代城市</dt>
                 <dd>{round.modernPlace}</dd>
               </>
             )}

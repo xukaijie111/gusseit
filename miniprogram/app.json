@@ -2,7 +2,8 @@
   "pages": [
     "pages/index/index",
     "pages/game/game",
-    "pages/result/result"
+    "pages/result/result",
+    "pages/history/history"
   ],
   "window": {
     "navigationBarTitleText": "千年图谜",

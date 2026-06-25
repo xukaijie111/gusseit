@@ -39,3 +39,6 @@ guseeit:
   amap:
     key: ${AMAP_WEB_KEY:}
     base-url: ${AMAP_BASE_URL:https://restapi.amap.com/v3}
+  douyin:
+    app-id: ${DOUYIN_APP_ID:}
+    app-secret: ${DOUYIN_APP_SECRET:}

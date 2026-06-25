@@ -74,21 +74,13 @@
   text-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.4);
 }
 
-.hint-sub {
-  display: block;
-  margin-top: 6rpx;
-  font-size: 24rpx;
-  color: rgba(255, 255, 255, 0.62);
-  letter-spacing: 2rpx;
-}
-
 .launch-dock {
   position: fixed;
   left: 0;
   right: 0;
   bottom: 0;
   z-index: 3;
-  padding-bottom: env(safe-area-inset-bottom);
+  padding-bottom: calc(48rpx + env(safe-area-inset-bottom));
 }
 
 .count-row {
@@ -96,7 +88,7 @@
   justify-content: center;
   align-items: center;
   gap: 28rpx;
-  padding: 0 32rpx 24rpx;
+  padding: 0 32rpx 32rpx;
 }
 
 .count-token {
@@ -134,7 +126,7 @@
   width: 240rpx;
   height: 88rpx;
   line-height: 88rpx;
-  margin: 0 auto 28rpx;
+  margin: 0 auto;
   padding: 0;
   background: linear-gradient(135deg, #d4a848 0%, #b8860b 100%);
   color: #fff;
@@ -150,112 +142,15 @@
   opacity: 0.75;
 }
 
-.ruler-dock {
-  position: relative;
-  height: 156rpx;
-  background: rgba(12, 12, 14, 0.16);
-  border-radius: 28rpx 28rpx 0 0;
-  border-top: 1rpx solid rgba(255, 255, 255, 0.08);
+.history-link {
+  display: block;
+  margin: 24rpx auto 0;
+  padding: 12rpx 0;
+  text-align: center;
 }
 
-.ruler-pointer {
-  position: absolute;
-  left: 50%;
-  bottom: 36rpx;
-  z-index: 12;
-  width: 0;
-  height: 0;
-  margin-left: -12rpx;
-  border-left: 12rpx solid transparent;
-  border-right: 12rpx solid transparent;
-  border-bottom: 16rpx solid rgba(255, 255, 255, 0.92);
-  filter: drop-shadow(0 2rpx 6rpx rgba(0, 0, 0, 0.25));
-}
-
-.ruler-scroll {
-  width: 100%;
-  height: 156rpx;
-  white-space: nowrap;
-}
-
-.ruler-inner {
-  height: 156rpx;
-}
-
-.ruler-track {
-  position: relative;
-  height: 128rpx;
-  margin-top: 12rpx;
-}
-
-.ruler-dynasty-row {
-  position: relative;
-  height: 60rpx;
-}
-
-.dynasty-mark {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-sizing: border-box;
-  border-left: 1rpx solid rgba(255, 255, 255, 0.06);
-  border-right: 1rpx solid rgba(255, 255, 255, 0.06);
-}
-
-.dynasty-mark text {
-  font-size: 34rpx;
-  font-weight: 700;
-  color: #f5d78e;
-  text-shadow:
-    0 2rpx 6rpx rgba(0, 0, 0, 0.55),
-    0 0 16rpx rgba(184, 134, 11, 0.45);
-  letter-spacing: 2rpx;
-}
-
-.ruler-ticks-row {
-  position: relative;
-  height: 56rpx;
-  margin-top: 4rpx;
-  border-top: 1rpx solid rgba(255, 255, 255, 0.12);
-}
-
-.scale-tick {
-  position: absolute;
-  bottom: 0;
-  width: 0;
-  height: 100%;
-  z-index: 1;
-}
-
-.scale-tick-line {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  transform: translateX(-50%);
-  background: rgba(255, 255, 255, 0.85);
-}
-
-.scale-tick-short .scale-tick-line {
-  width: 2rpx;
-  height: 18rpx;
-  opacity: 0.5;
-}
-
-.scale-tick-mid .scale-tick-line {
-  width: 2rpx;
-  height: 28rpx;
-  opacity: 0.75;
-}
-
-.scale-tick-label {
-  position: absolute;
-  bottom: 36rpx;
-  left: 0;
-  transform: translateX(-50%);
-  font-size: 18rpx;
-  color: rgba(255, 255, 255, 0.78);
-  white-space: nowrap;
+.history-link-text {
+  font-size: 26rpx;
+  color: rgba(255, 255, 255, 0.55);
+  letter-spacing: 4rpx;
 }
