@@ -6,22 +6,49 @@
     <text class="round-no">{{round.roundIndex}} / {{round.totalRounds}}</text>
   </view>
 
-  <view class="year-overlay">
-    <text class="dynasty-big">{{currentDynastyTitle || '—'}}</text>
+  <view class="controls-left" wx:if="{{!resultVisible && !mapExpanded}}">
+    <view class="dynasty-panel">
+      <text class="dynasty-big">{{currentDynastyTitle || '—'}}</text>
+    </view>
+
+    <view class="map-slot">
+      <view class="map-float {{picked ? 'map-float--picked' : ''}}">
+        <map
+          id="pickMap"
+          class="map-widget"
+          latitude="{{mapLat}}"
+          longitude="{{mapLng}}"
+          scale="{{pickMapScale}}"
+          min-scale="3"
+          max-scale="19"
+          markers="{{markers}}"
+          enable-scroll="{{true}}"
+          enable-zoom="{{true}}"
+          enable-poi="{{true}}"
+          show-scale="{{false}}"
+          bindtap="onMapTap"
+        />
+        <view class="map-float-hit" bindtap="expandMap"></view>
+        <view class="map-float-label" wx:if="{{!pickedCity}}">在哪里？</view>
+      </view>
+
+      <view
+        class="map-city-chip"
+        wx:if="{{picked && pickedCity}}"
+        bindtap="expandMap"
+      >
+        <text class="map-city-chip-label">已选</text>
+        <text class="map-city-chip-name">{{pickedCity}}</text>
+      </view>
+    </view>
   </view>
 
   <view
-    class="map-backdrop {{mapExpanded ? 'map-backdrop--show' : ''}}"
-    bindtap="collapseMap"
-    catchtouchmove="noop"
-  ></view>
-
-  <view
-    class="map-float {{mapExpanded ? 'map-float--expanded' : ''}} {{picked ? 'map-float--picked' : ''}}"
-    wx:if="{{!resultVisible}}"
+    class="map-float map-float--expanded {{picked ? 'map-float--picked' : ''}}"
+    wx:if="{{!resultVisible && mapExpanded}}"
   >
     <map
-      id="pickMap"
+      id="pickMapExpanded"
       class="map-widget"
       latitude="{{mapLat}}"
       longitude="{{mapLng}}"
@@ -32,27 +59,26 @@
       enable-scroll="{{true}}"
       enable-zoom="{{true}}"
       enable-poi="{{true}}"
-      show-scale="{{mapExpanded}}"
+      show-scale="{{true}}"
       bindtap="onMapTap"
     />
-    <view class="map-float-hit" wx:if="{{!mapExpanded}}" bindtap="expandMap"></view>
-    <view class="map-float-label" wx:if="{{!mapExpanded && !pickedCity}}">在哪里？</view>
-    <view class="map-picked-wrap" wx:if="{{mapExpanded && (pickedCity || cityResolving)}}">
+    <view class="map-picked-wrap" wx:if="{{pickedCity || cityResolving}}">
       <view class="map-picked-bar">
         <text>{{cityResolving ? '识别城市中…' : '已选 ' + pickedCity}}</text>
       </view>
     </view>
-    <view class="map-float-done" wx:if="{{mapExpanded}}" catchtap="collapseMap">完成</view>
+    <view class="map-float-done" catchtap="collapseMap">完成</view>
+  </view>
+
+  <view class="dynasty-panel dynasty-panel--expanded" wx:if="{{!resultVisible && mapExpanded}}">
+    <text class="dynasty-big">{{currentDynastyTitle || '—'}}</text>
   </view>
 
   <view
-    class="map-city-chip"
-    wx:if="{{!mapExpanded && picked && pickedCity && !resultVisible}}"
-    bindtap="expandMap"
-  >
-    <text class="map-city-chip-label">已选</text>
-    <text class="map-city-chip-name">{{pickedCity}}</text>
-  </view>
+    class="map-backdrop {{mapExpanded ? 'map-backdrop--show' : ''}}"
+    bindtap="collapseMap"
+    catchtouchmove="noop"
+  ></view>
 
   <button
     class="submit-pill"
@@ -63,24 +89,24 @@
     {{submitting ? '提交中' : '提交'}}
   </button>
 
-  <view class="ruler-dock" wx:if="{{!resultVisible}}">
+  <view class="ruler-dock" wx:if="{{!resultVisible && !mapExpanded}}">
     <view class="ruler-pointer"></view>
     <scroll-view
       class="ruler-scroll"
-      scroll-x="{{true}}"
-      scroll-left="{{scrollLeft}}"
+      scroll-y="{{true}}"
+      scroll-top="{{scrollTop}}"
       bindscroll="onRulerScroll"
       bindtouchend="onRulerTouchEnd"
       show-scrollbar="{{false}}"
     >
-      <view class="ruler-inner" style="width: {{rulerTotalWidth}}px;">
-        <view class="ruler-track" style="width: {{rulerInnerWidth}}px; margin-left: {{sidePad}}px;">
+      <view class="ruler-inner" style="height: {{rulerTotalHeight}}px;">
+        <view class="ruler-track" style="height: {{rulerInnerWidth}}px; margin-top: {{sidePad}}px;">
           <view class="ruler-dynasty-row">
             <view
               wx:for="{{rulerSegments}}"
               wx:key="name"
               class="dynasty-mark"
-              style="left: {{item.left}}px; width: {{item.width}}px;"
+              style="top: {{item.left}}px; height: {{item.width}}px;"
             >
               <text>{{item.name}}</text>
             </view>
@@ -90,7 +116,7 @@
               wx:for="{{rulerTicks}}"
               wx:key="year"
               class="scale-tick scale-tick-{{item.size}}"
-              style="left: {{item.left}}px;"
+              style="top: {{item.left}}px;"
             >
               <view class="scale-tick-line"></view>
               <text wx:if="{{item.label}}" class="scale-tick-label">{{item.label}}</text>

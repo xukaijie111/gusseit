@@ -181,11 +181,11 @@ Page({
     dynastyId: null,
     currentDynasty: "",
     currentDynastyTitle: "",
-    scrollLeft: 0,
+    scrollTop: 0,
     rulerSegments: [],
     rulerTicks: [],
     rulerInnerWidth: 0,
-    rulerTotalWidth: 0,
+    rulerTotalHeight: 0,
     sidePad: 0,
     mapExpanded: false,
     submitting: false,
@@ -276,6 +276,7 @@ Page({
     var self = this;
     var sys = tt.getSystemInfoSync();
     var winW = sys.windowWidth;
+    var rulerViewH = Math.round((580 * winW) / 750);
     var innerWidth = timeline.contentWidthPx();
     var defaultYear = timeline.defaultYear();
     var defaultDynasty = timeline.dynastyAt(defaultYear);
@@ -288,9 +289,9 @@ Page({
       rulerSegments: timeline.buildSegments(),
       rulerTicks: timeline.buildTicks(),
       rulerInnerWidth: innerWidth,
-      rulerTotalWidth: innerWidth + winW,
-      sidePad: winW / 2,
-      scrollLeft: timeline.yearToScrollLeft(defaultYear),
+      rulerTotalHeight: innerWidth + rulerViewH,
+      sidePad: rulerViewH / 2,
+      scrollTop: timeline.yearToScrollLeft(defaultYear),
     });
   },
 
@@ -383,7 +384,7 @@ Page({
 
   onRulerScroll: function (e) {
     if (this.data._scrollLock || this.data.resultVisible) return;
-    var year = timeline.offsetToYear(e.detail.scrollLeft);
+    var year = timeline.offsetToYear(e.detail.scrollTop);
     if (year === this.data.yearAd) return;
     var dynasty = timeline.dynastyAt(year);
     this.setData({
@@ -399,9 +400,9 @@ Page({
     var self = this;
     var target = timeline.yearToScrollLeft(this.data.yearAd);
     this.setData({ _scrollLock: true });
-    this.setData({ scrollLeft: target + 0.01 });
+    this.setData({ scrollTop: target + 0.01 });
     setTimeout(function () {
-      self.setData({ scrollLeft: target, _scrollLock: false });
+      self.setData({ scrollTop: target, _scrollLock: false });
     }, 50);
   },
 

@@ -46,29 +46,24 @@
   letter-spacing: 2rpx;
 }
 
-.year-overlay {
-  position: absolute;
-  left: 0;
-  right: 280rpx;
-  bottom: calc(220rpx + env(safe-area-inset-bottom));
-  z-index: 5;
-  padding: 0 40rpx;
-  pointer-events: none;
+.controls-left {
+  position: fixed;
+  left: 24rpx;
+  bottom: calc(128rpx + env(safe-area-inset-bottom));
+  z-index: 8;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 16rpx;
+  max-width: calc(100% - 168rpx);
 }
 
-.year-big {
-  display: block;
-  font-size: 72rpx;
-  font-weight: 700;
-  color: #ffffff;
-  line-height: 1.15;
-  text-shadow: 0 4rpx 24rpx rgba(0, 0, 0, 0.45);
-  font-family: "Songti SC", "STSong", serif;
+.dynasty-panel {
+  pointer-events: none;
 }
 
 .dynasty-big {
   display: block;
-  margin-top: 10rpx;
   font-size: 48rpx;
   font-weight: 700;
   color: rgba(255, 255, 255, 0.95);
@@ -76,10 +71,17 @@
   font-family: "Songti SC", "STSong", serif;
 }
 
+.map-slot {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12rpx;
+}
+
 .map-backdrop {
   position: fixed;
   inset: 0;
-  z-index: 15;
+  z-index: 25;
   background: rgba(0, 0, 0, 0);
   pointer-events: none;
   transition: background 0.35s ease;
@@ -91,39 +93,37 @@
 }
 
 .map-float {
-  position: fixed;
-  z-index: 20;
-  right: 24rpx;
-  bottom: calc(182rpx + env(safe-area-inset-bottom));
-  width: 220rpx;
-  height: 168rpx;
+  position: relative;
+  width: 280rpx;
+  height: 176rpx;
   border-radius: 16rpx;
   overflow: hidden;
   box-shadow: 0 8rpx 28rpx rgba(0, 0, 0, 0.4);
   border: 2rpx solid rgba(255, 255, 255, 0.35);
-  transition:
-    width 0.38s cubic-bezier(0.32, 0.72, 0, 1),
-    height 0.38s cubic-bezier(0.32, 0.72, 0, 1),
-    right 0.38s cubic-bezier(0.32, 0.72, 0, 1),
-    bottom 0.38s cubic-bezier(0.32, 0.72, 0, 1),
-    border-radius 0.38s ease;
 }
 
 .map-float--picked {
   border-color: rgba(255, 255, 255, 0.85);
 }
 
-.map-float--picked:not(.map-float--expanded) {
-  bottom: calc(288rpx + env(safe-area-inset-bottom));
+.map-float--expanded {
+  position: fixed;
+  left: 16rpx;
+  right: 16rpx;
+  top: calc(120rpx + env(safe-area-inset-top));
+  bottom: calc(128rpx + env(safe-area-inset-bottom));
+  z-index: 30;
+  width: auto;
+  height: auto;
+  border-radius: 20rpx;
 }
 
-.map-float--expanded {
-  right: 16rpx;
-  left: 16rpx;
-  bottom: calc(120rpx + env(safe-area-inset-bottom));
-  width: 100%;
-  height: 76vh;
-  border-radius: 20rpx;
+.dynasty-panel--expanded {
+  position: fixed;
+  left: 24rpx;
+  top: calc(120rpx + env(safe-area-inset-top));
+  z-index: 31;
+  pointer-events: none;
 }
 
 .map-widget {
@@ -154,11 +154,7 @@
 }
 
 .map-city-chip {
-  position: fixed;
-  right: 24rpx;
-  bottom: calc(220rpx + env(safe-area-inset-bottom));
-  z-index: 6;
-  width: 220rpx;
+  width: 280rpx;
   padding: 14rpx 20rpx;
   box-sizing: border-box;
   background: rgba(12, 12, 16, 0.78);
@@ -231,14 +227,15 @@
 
 .submit-pill {
   position: fixed;
-  right: 24rpx;
-  bottom: calc(72rpx + env(safe-area-inset-bottom));
-  z-index: 15;
+  left: 50%;
+  bottom: calc(24rpx + env(safe-area-inset-bottom));
+  z-index: 12;
   margin: 0;
   padding: 0;
-  width: 220rpx;
+  width: 320rpx;
   height: 88rpx;
   line-height: 88rpx;
+  transform: translateX(-50%);
   background: rgba(255, 255, 255, 0.92);
   color: #1a1f2e;
   border: none;
@@ -254,131 +251,129 @@
 
 .ruler-dock {
   position: fixed;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  right: 16rpx;
+  bottom: calc(128rpx + env(safe-area-inset-bottom));
   z-index: 10;
-  height: 156rpx;
-  padding-bottom: env(safe-area-inset-bottom);
-  background: rgba(12, 12, 14, 0.16);
-  border-radius: 28rpx 28rpx 0 0;
-  box-sizing: content-box;
-  border-top: 1rpx solid rgba(255, 255, 255, 0.08);
+  width: 120rpx;
+  height: 580rpx;
+  background: rgba(12, 12, 14, 0.72);
+  border-radius: 20rpx;
+  box-sizing: border-box;
+  border: 1rpx solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8rpx 24rpx rgba(0, 0, 0, 0.28);
+  overflow: hidden;
 }
 
 .ruler-pointer {
   position: absolute;
-  left: 50%;
-  bottom: calc(36rpx + env(safe-area-inset-bottom));
+  left: 0;
+  top: 50%;
   z-index: 12;
   width: 0;
   height: 0;
-  margin-left: -12rpx;
-  border-left: 12rpx solid transparent;
-  border-right: 12rpx solid transparent;
-  border-bottom: 16rpx solid rgba(255, 255, 255, 0.92);
+  margin-top: -10rpx;
+  border-top: 10rpx solid transparent;
+  border-bottom: 10rpx solid transparent;
+  border-left: 14rpx solid rgba(255, 255, 255, 0.92);
   filter: drop-shadow(0 2rpx 6rpx rgba(0, 0, 0, 0.25));
 }
 
 .ruler-scroll {
   width: 100%;
-  height: 156rpx;
-  padding-bottom: env(safe-area-inset-bottom);
-  white-space: nowrap;
+  height: 100%;
 }
 
 .ruler-inner {
-  height: 156rpx;
+  width: 120rpx;
 }
 
 .ruler-track {
   position: relative;
-  height: 128rpx;
-  margin-top: 12rpx;
+  width: 100%;
 }
 
 .ruler-dynasty-row {
-  position: relative;
-  height: 60rpx;
+  position: absolute;
+  inset: 0;
 }
 
 .dynasty-mark {
   position: absolute;
-  top: 0;
-  bottom: 0;
+  left: 0;
+  right: 0;
   display: flex;
   align-items: center;
   justify-content: center;
   overflow: hidden;
   box-sizing: border-box;
-  border-left: 1rpx solid rgba(255, 255, 255, 0.06);
-  border-right: 1rpx solid rgba(255, 255, 255, 0.06);
+  border-top: 1rpx solid rgba(255, 255, 255, 0.06);
+  border-bottom: 1rpx solid rgba(255, 255, 255, 0.06);
 }
 
 .dynasty-mark text {
-  font-size: 40rpx;
+  font-size: 28rpx;
   font-weight: 700;
   color: #f5d78e;
   text-shadow:
     0 2rpx 6rpx rgba(0, 0, 0, 0.55),
     0 0 16rpx rgba(184, 134, 11, 0.45);
-  letter-spacing: 3rpx;
+  letter-spacing: 2rpx;
+  writing-mode: vertical-rl;
 }
 
 .ruler-ticks-row {
-  position: relative;
-  height: 56rpx;
-  margin-top: 4rpx;
-  border-top: 1rpx solid rgba(255, 255, 255, 0.12);
+  position: absolute;
+  inset: 0;
+  border-left: 1rpx solid rgba(255, 255, 255, 0.12);
 }
 
 .scale-tick {
   position: absolute;
-  bottom: 0;
-  width: 0;
-  height: 100%;
+  left: 0;
+  width: 100%;
+  height: 0;
   z-index: 1;
 }
 
 .scale-tick-line {
   position: absolute;
-  bottom: 0;
+  top: 0;
   left: 0;
-  transform: translateX(-50%);
+  transform: translateY(-50%);
   background: rgba(255, 255, 255, 0.85);
 }
 
 .scale-tick-mini .scale-tick-line {
-  width: 1rpx;
-  height: 10rpx;
+  width: 10rpx;
+  height: 1rpx;
   opacity: 0.35;
 }
 
 .scale-tick-short .scale-tick-line {
-  width: 2rpx;
-  height: 18rpx;
+  width: 18rpx;
+  height: 2rpx;
   opacity: 0.5;
 }
 
 .scale-tick-mid .scale-tick-line {
-  width: 2rpx;
-  height: 28rpx;
+  width: 28rpx;
+  height: 2rpx;
   opacity: 0.65;
 }
 
 .scale-tick-long .scale-tick-line {
-  width: 2rpx;
-  height: 38rpx;
+  width: 38rpx;
+  height: 2rpx;
   background: rgba(255, 255, 255, 0.85);
 }
 
 .scale-tick-label {
   position: absolute;
-  bottom: 36rpx;
-  left: 0;
-  transform: translateX(-50%);
-  font-size: 20rpx;
-  font-weight: 500;
-  color: rgba(255, 255, 255, 0.78);
+  top: 0;
+  left: 44rpx;
+  transform: translateY(-50%);
+  font-size: 26rpx;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.88);
   white-space: nowrap;
 }
