@@ -12,6 +12,7 @@
   width: 100%;
   height: 100%;
   z-index: 0;
+  display: block;
 }
 
 .page-overlay {
@@ -23,55 +24,35 @@
   z-index: 1;
   background: linear-gradient(
     180deg,
-    rgba(15, 10, 5, 0.2) 0%,
-    rgba(15, 10, 5, 0.35) 38%,
-    rgba(15, 10, 5, 0.62) 100%
+    rgba(15, 10, 5, 0.08) 0%,
+    rgba(15, 10, 5, 0.18) 38%,
+    rgba(15, 10, 5, 0.48) 100%
   );
   pointer-events: none;
 }
 
-.hero {
-  position: relative;
+.page-center {
+  position: fixed;
+  top: 50%;
+  left: 0;
+  right: 0;
   z-index: 2;
-  padding: 48rpx 40rpx 0;
-  padding-top: calc(48rpx + env(safe-area-inset-top));
-}
-
-.title {
-  display: block;
-  font-size: 56rpx;
-  font-weight: 700;
-  color: #f5d78e;
-  text-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.45);
-  font-family: "Songti SC", "STSong", serif;
+  transform: translateY(-50%);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0 48rpx;
+  pointer-events: none;
 }
 
 .subtitle {
   display: block;
-  margin-top: 16rpx;
-  font-size: 28rpx;
-  color: rgba(255, 255, 255, 0.82);
-  text-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.35);
-}
-
-.selected-hint {
-  margin-top: 40rpx;
-}
-
-.hint-label {
-  display: block;
-  font-size: 22rpx;
-  color: rgba(255, 255, 255, 0.55);
-  letter-spacing: 4rpx;
-}
-
-.hint-value {
-  display: block;
-  margin-top: 8rpx;
-  font-size: 36rpx;
-  font-weight: 600;
-  color: #f5d78e;
-  text-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.4);
+  font-size: 32rpx;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.88);
+  text-align: center;
+  letter-spacing: 6rpx;
+  text-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.5);
 }
 
 .launch-dock {

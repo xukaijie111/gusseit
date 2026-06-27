@@ -5,7 +5,7 @@
     bindscrolltolower="onScrollToLower"
     lower-threshold="300"
   >
-    <block wx:for="{{sections}}" wx:key="label">
+    <block wx:for="{{sections}}" wx:key="label" wx:for-index="sectionIdx">
       <view class="section-divider">
         <text class="section-divider-text">{{item.label}}</text>
       </view>
@@ -15,18 +15,21 @@
           class="card"
           wx:for="{{item.rows}}"
           wx:for-item="r"
+          wx:for-index="rowIdx"
           wx:key="id"
-          data-index="{{index}}"
-          data-section="{{outerIndex}}"
+          data-index="{{rowIdx}}"
+          data-section="{{sectionIdx}}"
           bindtap="onTapCard"
         >
-          <image class="card-img" src="{{r.imageUrl}}" mode="aspectFill" lazy-load="{{true}}" />
-          <view class="card-overlay">
-            <view class="card-badge">
-              <text class="card-score">{{r.totalScore}}分</text>
+          <view class="card-media">
+            <image class="card-img" src="{{r.imageUrl}}" mode="aspectFill" lazy-load="{{true}}" />
+            <view class="card-overlay">
+              <view class="card-badge">
+                <text class="card-score">{{r.totalScore}}分</text>
+              </view>
+              <text class="card-place">{{r.locationName || r.answerCity}}</text>
+              <text class="card-meta">{{r.answerDynastyTitle}}</text>
             </view>
-            <text class="card-place">{{r.locationName || r.answerCity}}</text>
-            <text class="card-meta">{{r.answerDynastyTitle}} · {{r.answerYear}}年</text>
           </view>
         </view>
       </view>

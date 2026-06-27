@@ -55,9 +55,9 @@
   </view>
 
   <button
-    class="submit-pill {{picked && !resultVisible ? 'submit-pill--ready' : ''}}"
+    class="submit-pill"
     wx:if="{{!resultVisible}}"
-    disabled="{{!picked || submitting}}"
+    disabled="{{submitting}}"
     bindtap="onSubmit"
   >
     {{submitting ? '提交中' : '提交'}}
@@ -121,11 +121,8 @@
     eventTime="{{resultEventTime}}"
     knowledgeText="{{resultKnowledgeText}}"
     knowledgeImage="{{resultKnowledgeImage}}"
-    showBaike="{{resultBaikeUrl ? true : false}}"
-    baikeUrl="{{resultBaikeUrl}}"
     nextLabel="{{resultNextLabel}}"
     bind:previewimage="onResultSheetPreviewImage"
-    bind:openbaike="onResultSheetOpenBaike"
     bind:next="onResultNext"
   />
 </view>

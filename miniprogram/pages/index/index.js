@@ -1,16 +1,17 @@
 const config = require("../../config.js");
 const api = require("../../utils/api.js");
+const homeBgSrc = require("../../assets/home-bg.js");
 
 Page({
   data: {
-    homeVideoSrc: config.homeVideoSrc,
+    homeBgSrc: homeBgSrc,
     countOptions: ["3", "5", "8"],
     countIndex: 1,
     loading: false,
   },
 
   onCountTap: function (e) {
-    var index = Number(e.detail.currentTarget.dataset.index);
+    var index = Number(e.currentTarget.dataset.index);
     if (Number.isNaN(index)) return;
     this.setData({ countIndex: index });
   },

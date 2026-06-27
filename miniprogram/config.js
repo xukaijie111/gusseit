@@ -3,6 +3,4 @@
 module.exports = {
   apiBase: "http://127.0.0.1:8787",
   defaultRoundCount: 5,
-  homeVideoSrc:
-    "https://xkjpicture.oss-cn-beijing.aliyuncs.com/guseeit/home/home-bg.mp4",
 };

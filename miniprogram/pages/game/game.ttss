@@ -94,7 +94,7 @@
   position: fixed;
   z-index: 20;
   right: 24rpx;
-  bottom: calc(230rpx + env(safe-area-inset-bottom));
+  bottom: calc(182rpx + env(safe-area-inset-bottom));
   width: 220rpx;
   height: 168rpx;
   border-radius: 16rpx;
@@ -114,7 +114,7 @@
 }
 
 .map-float--picked:not(.map-float--expanded) {
-  bottom: calc(336rpx + env(safe-area-inset-bottom));
+  bottom: calc(288rpx + env(safe-area-inset-bottom));
 }
 
 .map-float--expanded {
@@ -156,7 +156,7 @@
 .map-city-chip {
   position: fixed;
   right: 24rpx;
-  bottom: calc(268rpx + env(safe-area-inset-bottom));
+  bottom: calc(220rpx + env(safe-area-inset-bottom));
   z-index: 6;
   width: 220rpx;
   padding: 14rpx 20rpx;
@@ -232,35 +232,24 @@
 .submit-pill {
   position: fixed;
   right: 24rpx;
-  bottom: calc(168rpx + env(safe-area-inset-bottom));
-  z-index: 6;
+  bottom: calc(72rpx + env(safe-area-inset-bottom));
+  z-index: 15;
   margin: 0;
   padding: 0;
   width: 220rpx;
   height: 88rpx;
   line-height: 88rpx;
-  background: rgba(255, 255, 255, 0.2);
-  color: rgba(255, 255, 255, 0.45);
-  border: 2rpx solid rgba(255, 255, 255, 0.25);
+  background: rgba(255, 255, 255, 0.92);
+  color: #1a1f2e;
+  border: none;
   border-radius: 999rpx;
   font-size: 32rpx;
   font-weight: 700;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.25s ease, background 0.25s ease;
   box-shadow: 0 6rpx 20rpx rgba(0, 0, 0, 0.18);
 }
 
-.submit-pill--ready {
-  opacity: 1;
-  pointer-events: auto;
-  background: rgba(255, 255, 255, 0.92);
-  color: #1a1f2e;
-  border-color: transparent;
-}
-
 .submit-pill[disabled] {
-  opacity: 0.35;
+  opacity: 0.65;
 }
 
 .ruler-dock {

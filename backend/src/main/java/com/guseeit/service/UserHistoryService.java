@@ -7,6 +7,7 @@ import com.guseeit.dto.UserHistoryView;
 import com.guseeit.repository.AnecdoteImageRepository;
 import com.guseeit.repository.UserHistoryRepository;
 import com.guseeit.support.DynastyConstants;
+import com.guseeit.support.KnowledgeSummaryHelper;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
@@ -51,9 +52,46 @@ public class UserHistoryService {
         h.setImageUrl(image.getImageUrl());
         h.setLocationName(image.getHistoricalPlace());
         h.setModernPlace(image.getModernCity());
-        h.setAnecdoteName(image.getAnecdoteName());
-        h.setKnowledgeSummary(image.getSummary());
+        h.setAnecdoteName(KnowledgeSummaryHelper.anecdoteTitle(image));
+        h.setKnowledgeSummary(KnowledgeSummaryHelper.resolve(image));
         historyRepository.save(h);
+    }
+
+    private static boolean isBlank(String s) {
+        return s == null || s.trim().isEmpty();
+    }
+
+    private void enrichFromImage(UserHistoryView v, AnecdoteImage img) {
+        v.setHistoricalCity(img.getHistoricalPlace());
+        v.setTimeLabel(DynastyConstants.toName(img.getDynastyId()));
+
+        if (isBlank(v.getImageUrl())) {
+            v.setImageUrl(img.getImageUrl());
+        }
+        if (isBlank(v.getLocationName())) {
+            v.setLocationName(img.getHistoricalPlace());
+        }
+        if (isBlank(v.getModernPlace())) {
+            v.setModernPlace(img.getModernCity());
+        }
+        if (isBlank(v.getAnecdoteTitle())) {
+            v.setAnecdoteTitle(KnowledgeSummaryHelper.anecdoteTitle(img));
+        }
+        if (isBlank(v.getKnowledgeSummary())) {
+            v.setKnowledgeSummary(KnowledgeSummaryHelper.resolve(img));
+        }
+        if (isBlank(v.getAnswerCity())) {
+            v.setAnswerCity(img.getModernCity());
+        }
+        if (isBlank(v.getAnswerDynasty())) {
+            v.setAnswerDynasty(DynastyConstants.toName(img.getDynastyId()));
+        }
+        if (v.getAnswerLat() == null && img.getLatitude() != null) {
+            v.setAnswerLat(img.getLatitude());
+        }
+        if (v.getAnswerLng() == null && img.getLongitude() != null) {
+            v.setAnswerLng(img.getLongitude());
+        }
     }
 
     public int count(Long userId) {
@@ -91,10 +129,7 @@ public class UserHistoryService {
 
             if (h.getImageId() != null) {
                 Optional<AnecdoteImage> img = imageRepository.findById(h.getImageId());
-                if (img.isPresent()) {
-                    v.setHistoricalCity(img.get().getHistoricalPlace());
-                    v.setTimeLabel(DynastyConstants.toName(img.get().getDynastyId()));
-                }
+                img.ifPresent(anecdoteImage -> enrichFromImage(v, anecdoteImage));
             }
             views.add(v);
         }

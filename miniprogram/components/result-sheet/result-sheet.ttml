@@ -69,7 +69,6 @@
           <text class="result-knowledge-text">{{knowledgeText}}</text>
           <view class="result-knowledge-foot">
             <text class="result-knowledge-src">历史典故 · 本题场景</text>
-            <text class="result-baike-link" wx:if="{{showBaike && baikeUrl}}" bindtap="onOpenBaike">百度百科 ↗</text>
           </view>
         </view>
       </view>

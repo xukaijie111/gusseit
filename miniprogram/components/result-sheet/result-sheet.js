@@ -20,8 +20,6 @@ Component({
     knowledgeText: { type: String, value: "" },
     knowledgeImage: { type: String, value: "" },
     showClose: { type: Boolean, value: false },
-    showBaike: { type: Boolean, value: false },
-    baikeUrl: { type: String, value: "" },
     nextLabel: { type: String, value: "" },
   },
 
@@ -34,9 +32,6 @@ Component({
     },
     onPreviewImage: function () {
       this.triggerEvent("previewimage", { url: this.properties.knowledgeImage });
-    },
-    onOpenBaike: function () {
-      this.triggerEvent("openbaike");
     },
   },
 });

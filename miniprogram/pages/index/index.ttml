@@ -1,25 +1,9 @@
 <view class="page">
-  <video
-    class="page-bg"
-    src="{{homeVideoSrc}}"
-    autoplay="{{true}}"
-    loop="{{true}}"
-    muted="{{true}}"
-    controls="{{false}}"
-    show-fullscreen-btn="{{false}}"
-    show-play-btn="{{false}}"
-    enable-progress-gesture="{{false}}"
-    object-fit="cover"
-  />
+  <image class="page-bg" src="{{homeBgSrc}}" mode="aspectFill" />
   <view class="page-overlay"></view>
 
-  <view class="hero">
-    <text class="title">千年图谜</text>
+  <view class="page-center">
     <text class="subtitle">一张图，猜地点，猜年代</text>
-    <view class="selected-hint">
-      <text class="hint-label">即将入卷</text>
-      <text class="hint-value">{{countOptions[countIndex]}} 题</text>
-    </view>
   </view>
 
   <view class="launch-dock">

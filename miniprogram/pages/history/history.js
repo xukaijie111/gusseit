@@ -178,9 +178,11 @@ Page({
   },
 
   onTapCard: function (e) {
-    var sectionIdx = e.currentTarget.dataset.section;
-    var index = e.currentTarget.dataset.index;
-    var row = this.data.sections[sectionIdx].rows[index];
+    var sectionIdx = Number(e.currentTarget.dataset.section);
+    var index = Number(e.currentTarget.dataset.index);
+    var section = this.data.sections[sectionIdx];
+    if (!section || !section.rows) return;
+    var row = section.rows[index];
     if (!row) return;
 
     var dist = Number(row.distanceKm) || 0;
@@ -229,7 +231,7 @@ Page({
   },
 
   onPreviewSheetImage: function (e) {
-    var url = e.currentTarget.dataset.url;
+    var url = (e.detail && e.detail.url) || e.currentTarget.dataset.url;
     if (url) {
       tt.previewImage({ urls: [url] });
     }

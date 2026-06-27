@@ -217,7 +217,6 @@ Page({
     resultAnecdoteTitle: "",
     resultKnowledgeText: "",
     resultKnowledgeImage: "",
-    resultBaikeUrl: "",
     resultEventTime: "",
   },
 
@@ -442,7 +441,6 @@ Page({
           resultAnecdoteTitle: answer.anecdoteTitle || answer.sceneType || "",
           resultKnowledgeText: answer.knowledgeSummary || "",
           resultKnowledgeImage: this.data.round.imageUrl || "",
-          resultBaikeUrl: answer.baikeUrl || "",
           resultNextLabel: isLast ? "查看总成绩" : "下一题",
           resultPolyline: mapState.resultPolyline,
           resultMapLat: mapState.resultMapLat,
@@ -465,17 +463,6 @@ Page({
     if (url) {
       tt.previewImage({ urls: [url] });
     }
-  },
-
-  onResultSheetOpenBaike: function () {
-    var url = this.data.resultBaikeUrl;
-    if (!url) return;
-    tt.setClipboardData({
-      data: url,
-      success: function () {
-        tt.showToast({ title: "百科链接已复制", icon: "none" });
-      },
-    });
   },
 
   onSubmit: function () {

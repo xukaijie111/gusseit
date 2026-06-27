@@ -11,6 +11,8 @@ import com.guseeit.support.DynastyConstants;
 import com.guseeit.support.EraConstants;
 import com.guseeit.support.KnowledgeSummaryHelper;
 import com.guseeit.support.ScoreCalculator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -26,6 +28,8 @@ import java.util.Set;
 
 @Service
 public class GameService {
+
+    private static final Logger log = LoggerFactory.getLogger(GameService.class);
 
     private final AnecdoteImageRepository imageRepository;
     private final GeocodeClient geocodeClient;
@@ -79,20 +83,57 @@ public class GameService {
         pool.removeIf(r -> r.getImageUrl() == null || r.getImageUrl().trim().isEmpty());
 
         Long userId = userService.resolveUserId(token);
-        if (userId != null) {
-            Set<Long> answered = new HashSet<>(historyService.answeredImageIds(userId));
-            pool.removeIf(r -> answered.contains(r.getId()));
+        List<AnecdoteImage> selected = selectPool(pool, userId, size);
+
+        if (selected.isEmpty()) {
+            throw new IllegalStateException("暂无可用题目，请先在管理端生成图片");
         }
 
-        if (pool.isEmpty()) throw new IllegalStateException("暂无可用题目，请先在管理端生成图片");
-
-        Collections.shuffle(pool);
         List<GameRoundView> views = new ArrayList<>();
-        for (int i = 0; i < Math.min(size, pool.size()); i++) {
-            AnecdoteImage img = pool.get(i);
-            views.add(GameRoundView.of(img.getId(), DynastyConstants.toName(img.getDynastyId()), img.getImageUrl(), i + 1, Math.min(size, pool.size())));
+        int total = selected.size();
+        for (int i = 0; i < total; i++) {
+            AnecdoteImage img = selected.get(i);
+            views.add(GameRoundView.of(img.getId(), DynastyConstants.toName(img.getDynastyId()), img.getImageUrl(), i + 1, total));
         }
         return views;
+    }
+
+    /** 优先未答过的题；不足 count 时再补已答过的。 */
+    private List<AnecdoteImage> selectPool(List<AnecdoteImage> pool, Long userId, int count) {
+        if (pool.isEmpty()) return Collections.emptyList();
+
+        if (userId == null) {
+            List<AnecdoteImage> copy = new ArrayList<>(pool);
+            Collections.shuffle(copy);
+            return copy.subList(0, Math.min(count, copy.size()));
+        }
+
+        Set<Long> answered = new HashSet<>(historyService.answeredImageIds(userId));
+        List<AnecdoteImage> fresh = new ArrayList<>();
+        List<AnecdoteImage> done = new ArrayList<>();
+        for (AnecdoteImage img : pool) {
+            if (answered.contains(img.getId())) {
+                done.add(img);
+            } else {
+                fresh.add(img);
+            }
+        }
+
+        Collections.shuffle(fresh);
+        Collections.shuffle(done);
+
+        List<AnecdoteImage> selected = new ArrayList<>();
+        for (AnecdoteImage img : fresh) {
+            if (selected.size() >= count) break;
+            selected.add(img);
+        }
+        if (selected.size() < count) {
+            for (AnecdoteImage img : done) {
+                if (selected.size() >= count) break;
+                selected.add(img);
+            }
+        }
+        return selected;
     }
 
     public GuessResultView submitGuess(GuessRequest request) {
@@ -143,7 +184,11 @@ public class GameService {
 
         Long userId = userService.resolveUserId(request.getToken());
         if (userId != null) {
-            try { historyService.save(userId, result, image); } catch (Exception ignored) {}
+            try {
+                historyService.save(userId, result, image);
+            } catch (Exception e) {
+                log.warn("保存答题历史失败 userId={} imageId={}: {}", userId, image.getId(), e.getMessage());
+            }
         }
         return result;
     }
