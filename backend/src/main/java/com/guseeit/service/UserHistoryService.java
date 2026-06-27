@@ -1,5 +1,6 @@
 package com.guseeit.service;
 
+import com.guseeit.client.OssService;
 import com.guseeit.domain.AnecdoteImage;
 import com.guseeit.domain.UserHistory;
 import com.guseeit.dto.GuessResultView;
@@ -20,10 +21,13 @@ public class UserHistoryService {
 
     private final UserHistoryRepository historyRepository;
     private final AnecdoteImageRepository imageRepository;
+    private final OssService ossService;
 
-    public UserHistoryService(UserHistoryRepository historyRepository, AnecdoteImageRepository imageRepository) {
+    public UserHistoryService(UserHistoryRepository historyRepository, AnecdoteImageRepository imageRepository,
+                              OssService ossService) {
         this.historyRepository = historyRepository;
         this.imageRepository = imageRepository;
+        this.ossService = ossService;
     }
 
     public List<Long> answeredImageIds(Long userId) {
@@ -66,7 +70,7 @@ public class UserHistoryService {
         v.setTimeLabel(DynastyConstants.toName(img.getDynastyId()));
 
         if (isBlank(v.getImageUrl())) {
-            v.setImageUrl(img.getImageUrl());
+            v.setImageUrl(ossService.toDisplayUrl(img.getImageUrl()));
         }
         if (isBlank(v.getLocationName())) {
             v.setLocationName(img.getHistoricalPlace());
@@ -120,7 +124,7 @@ public class UserHistoryService {
             v.setDynastyScore(h.getDynastyScore());
             v.setGeoScore(h.getGeoScore());
             v.setDistanceKm(h.getDistanceKm());
-            v.setImageUrl(h.getImageUrl());
+            v.setImageUrl(ossService.toDisplayUrl(h.getImageUrl()));
             v.setLocationName(h.getLocationName());
             v.setModernPlace(h.getModernPlace());
             v.setAnsweredAt(h.getAnsweredAt().toString());

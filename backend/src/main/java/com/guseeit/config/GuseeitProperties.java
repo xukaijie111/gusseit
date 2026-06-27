@@ -149,6 +149,10 @@ public class GuseeitProperties {
         private String accessKeyId;
         private String accessKeySecret;
         private String objectAcl;
+        /** 小程序等前端展示图宽度（OSS 图片处理 resize） */
+        private int displayWidth = 1080;
+        /** 前端展示图质量 1–100（OSS quality） */
+        private int displayQuality = 85;
 
         public String getEndpoint() {
             return endpoint;
@@ -204,6 +208,22 @@ public class GuseeitProperties {
 
         public void setObjectAcl(String objectAcl) {
             this.objectAcl = objectAcl;
+        }
+
+        public int getDisplayWidth() {
+            return displayWidth;
+        }
+
+        public void setDisplayWidth(int displayWidth) {
+            this.displayWidth = displayWidth;
+        }
+
+        public int getDisplayQuality() {
+            return displayQuality;
+        }
+
+        public void setDisplayQuality(int displayQuality) {
+            this.displayQuality = displayQuality;
         }
     }
 }

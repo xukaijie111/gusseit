@@ -86,6 +86,43 @@ public class OssService {
         return client;
     }
 
+    /**
+     * 为前端展示追加 OSS 图片处理参数（缩略 + 压缩），原图 URL 仍存库。
+     * 示例：.../foo.png?x-oss-process=image/resize,m_lfit,w_1080/quality,q_85
+     */
+    public String toDisplayUrl(String rawUrl) {
+        if (rawUrl == null || rawUrl.trim().isEmpty()) {
+            return rawUrl;
+        }
+        if (rawUrl.contains("x-oss-process=")) {
+            return rawUrl;
+        }
+        if (!isOssImageUrl(rawUrl)) {
+            return rawUrl;
+        }
+
+        int width = oss.getDisplayWidth() > 0 ? oss.getDisplayWidth() : 1080;
+        int quality = oss.getDisplayQuality() > 0 ? Math.min(oss.getDisplayQuality(), 100) : 85;
+        String process = "image/resize,m_lfit,w_" + width + "/quality,q_" + quality;
+        String sep = rawUrl.contains("?") ? "&" : "?";
+        return rawUrl + sep + "x-oss-process=" + process;
+    }
+
+    private boolean isOssImageUrl(String url) {
+        String publicBase = oss.getPublicBaseUrl();
+        if (publicBase != null && !publicBase.trim().isEmpty()) {
+            String base = publicBase.replaceAll("/$", "");
+            if (url.startsWith(base)) {
+                return true;
+            }
+        }
+        String bucket = oss.getBucket();
+        if (bucket != null && !bucket.trim().isEmpty() && url.contains(bucket + ".")) {
+            return true;
+        }
+        return url.contains(".aliyuncs.com/");
+    }
+
     public void delete(String objectKey) {
         if (objectKey == null || objectKey.trim().isEmpty()) return;
         try {

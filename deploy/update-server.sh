@@ -30,7 +30,14 @@ systemctl reload nginx
 
 # 3. 重启后端
 log "重启后端服务"
+systemctl daemon-reload
 systemctl restart guseeit-api
+sleep 6
 systemctl status guseeit-api --no-pager --lines=5
+
+# 4. 校验环境变量已注入（不打印密钥）
+if grep -q '^OSS_IMAGE_DISPLAY_WIDTH=' "${APP_ROOT}/.env" 2>/dev/null; then
+  log "OSS 展示图: $(grep '^OSS_IMAGE_DISPLAY_WIDTH=' "${APP_ROOT}/.env" | cut -d= -f2)px"
+fi
 
 log "=== Guseeit 更新完成 ==="

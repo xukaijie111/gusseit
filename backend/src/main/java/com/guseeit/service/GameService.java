@@ -2,6 +2,7 @@ package com.guseeit.service;
 
 import com.guseeit.client.GeocodeClient;
 import com.guseeit.client.GeocodeClient.CityPoint;
+import com.guseeit.client.OssService;
 import com.guseeit.domain.AnecdoteImage;
 import com.guseeit.dto.GameRoundView;
 import com.guseeit.dto.GuessRequest;
@@ -33,13 +34,15 @@ public class GameService {
 
     private final AnecdoteImageRepository imageRepository;
     private final GeocodeClient geocodeClient;
+    private final OssService ossService;
     private final UserService userService;
     private final UserHistoryService historyService;
 
     public GameService(AnecdoteImageRepository imageRepository, GeocodeClient geocodeClient,
-                       UserService userService, UserHistoryService historyService) {
+                       OssService ossService, UserService userService, UserHistoryService historyService) {
         this.imageRepository = imageRepository;
         this.geocodeClient = geocodeClient;
+        this.ossService = ossService;
         this.userService = userService;
         this.historyService = historyService;
     }
@@ -93,7 +96,12 @@ public class GameService {
         int total = selected.size();
         for (int i = 0; i < total; i++) {
             AnecdoteImage img = selected.get(i);
-            views.add(GameRoundView.of(img.getId(), DynastyConstants.toName(img.getDynastyId()), img.getImageUrl(), i + 1, total));
+            views.add(GameRoundView.of(
+                    img.getId(),
+                    DynastyConstants.toName(img.getDynastyId()),
+                    ossService.toDisplayUrl(img.getImageUrl()),
+                    i + 1,
+                    total));
         }
         return views;
     }

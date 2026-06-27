@@ -1,6 +1,8 @@
-// 模拟器可用 127.0.0.1；真机调试必须改为电脑局域网 IP（如 http://192.168.1.8:8787），且手机与电脑同 Wi‑Fi
-// 上线改为 HTTPS 域名并在抖音后台配置 request 合法域名
+// 本地调试: isDev=true，apiBase 指向本机
+// 上线/云端: isDev=false，并在抖音后台配置 request 合法域名 api.agentnow.fun
+var isDev = false;
+
 module.exports = {
-  apiBase: "http://127.0.0.1:8787",
+  apiBase: isDev ? "http://127.0.0.1:8787" : "https://api.agentnow.fun",
   defaultRoundCount: 5,
 };
