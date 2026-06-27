@@ -1,5 +1,5 @@
 <view class="page">
-  <image class="scene-bg" src="{{round.imageUrl}}" mode="aspectFill" bindtap="previewImage" />
+  <image class="scene-bg" src="{{round.imageUrl}}" mode="aspectFit" bindtap="previewImage" />
   <view class="page-shade"></view>
 
   <view class="top-bar">
@@ -7,7 +7,6 @@
   </view>
 
   <view class="year-overlay">
-    <text class="year-big">{{displayYearShort}}</text>
     <text class="dynasty-big">{{currentDynastyTitle || '—'}}</text>
   </view>
 
@@ -83,7 +82,7 @@
               class="dynasty-mark"
               style="left: {{item.left}}px; width: {{item.width}}px;"
             >
-              <text wx:if="{{item.width > 28}}">{{item.name}}</text>
+              <text>{{item.name}}</text>
             </view>
           </view>
           <view class="ruler-ticks-row">

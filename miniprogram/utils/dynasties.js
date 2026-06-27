@@ -1,48 +1,115 @@
 /**
- * 与后端 DynastyConstants.SUPPORTED 保持一致
- * key: API 传参；ruler: 尺子上刻字；title: 展示用全称
+ * 朝代数据从后端 /api/game/dynasties 获取，game 页加载并缓存
+ * FALLBACK 与后端 TimelineConstants 保持一致，兼容旧版 API 仅返回 id/name
  */
-var ALL = {
-  key: "",
-  ruler: "全部",
-  title: "全部朝代",
-};
 
-var LIST = [
-  { key: "秦", ruler: "秦", title: "秦朝", start: -221, end: -206 },
-  { key: "汉", ruler: "汉", title: "汉朝", start: -206, end: 220 },
-  { key: "三国", ruler: "三国", title: "三国", start: 220, end: 280 },
-  { key: "晋", ruler: "晋", title: "晋朝", start: 265, end: 420 },
-  { key: "南北朝", ruler: "南北朝", title: "南北朝", start: 420, end: 589 },
-  { key: "隋", ruler: "隋", title: "隋朝", start: 581, end: 618 },
-  { key: "唐", ruler: "唐", title: "唐朝", start: 618, end: 907 },
-  { key: "宋", ruler: "宋", title: "宋朝", start: 960, end: 1279 },
-  { key: "元", ruler: "元", title: "元朝", start: 1271, end: 1368 },
-  { key: "明", ruler: "明", title: "明朝", start: 1368, end: 1644 },
-  { key: "清", ruler: "清", title: "清朝", start: 1644, end: 1912 },
-  { key: "民国", ruler: "民国", title: "民国", start: 1912, end: 1949 },
+var ALL = { key: "", ruler: "全部", title: "全部朝代" };
+var ERA_ALL = { key: "", ruler: "全部", title: "全部朝代", subtitle: "不限", dynastyIds: null };
+
+var FALLBACK = [
+  { key: "春秋", ruler: "春秋", title: "春秋", start: -770, end: -476, id: 1 },
+  { key: "战国", ruler: "战国", title: "战国", start: -475, end: -221, id: 2 },
+  { key: "秦", ruler: "秦", title: "秦朝", start: -221, end: -206, id: 3 },
+  { key: "楚汉", ruler: "楚汉", title: "楚汉", start: -206, end: -202, id: 4 },
+  { key: "西汉", ruler: "西汉", title: "西汉", start: -202, end: 8, id: 5 },
+  { key: "东汉", ruler: "东汉", title: "东汉", start: 25, end: 220, id: 6 },
+  { key: "三国", ruler: "三国", title: "三国", start: 220, end: 280, id: 7 },
+  { key: "西晋", ruler: "西晋", title: "西晋", start: 265, end: 316, id: 8 },
+  { key: "东晋", ruler: "东晋", title: "东晋", start: 317, end: 420, id: 9 },
+  { key: "南北朝", ruler: "南北朝", title: "南北朝", start: 420, end: 589, id: 10 },
+  { key: "隋", ruler: "隋", title: "隋朝", start: 581, end: 618, id: 11 },
+  { key: "唐", ruler: "唐", title: "唐朝", start: 618, end: 907, id: 12 },
+  { key: "五代十国", ruler: "五代", title: "五代十国", start: 907, end: 960, id: 13 },
+  { key: "北宋", ruler: "北宋", title: "北宋", start: 960, end: 1127, id: 14 },
+  { key: "南宋", ruler: "南宋", title: "南宋", start: 1127, end: 1279, id: 15 },
+  { key: "元", ruler: "元", title: "元朝", start: 1271, end: 1368, id: 16 },
+  { key: "明", ruler: "明", title: "明朝", start: 1368, end: 1644, id: 17 },
+  { key: "清", ruler: "清", title: "清朝", start: 1644, end: 1912, id: 18 },
 ];
+
+function _fallbackByName() {
+  var map = {};
+  var i;
+  for (i = 0; i < FALLBACK.length; i++) {
+    map[FALLBACK[i].key] = FALLBACK[i];
+  }
+  return map;
+}
+
+function _normalizeList(list) {
+  if (!list || !list.length) return FALLBACK.slice();
+  if (list[0].start != null && list[0].end != null) {
+    return list.map(function (d) {
+      return {
+        key: d.key || d.name,
+        ruler: d.ruler || d.name || d.key,
+        title: d.title || d.name,
+        start: d.start,
+        end: d.end,
+        id: d.id,
+      };
+    });
+  }
+  var byName = _fallbackByName();
+  var out = [];
+  var i;
+  for (i = 0; i < list.length; i++) {
+    var d = list[i];
+    var base = byName[d.name] || byName[d.key];
+    if (!base) continue;
+    out.push({
+      key: base.key,
+      ruler: base.ruler,
+      title: base.title,
+      start: base.start,
+      end: base.end,
+      id: d.id != null ? d.id : base.id,
+    });
+  }
+  return out.length ? out : FALLBACK.slice();
+}
+
+function _data() {
+  try {
+    var app = getApp();
+    return app && app.globalData ? app.globalData.dynastiesData : null;
+  } catch (e) {
+    return null;
+  }
+}
+
+function _dynasties() {
+  var data = _data();
+  return _normalizeList((data && data.dynasties) || []);
+}
+
+function _eras() {
+  var data = _data();
+  return (data && data.eras) || [];
+}
 
 function pickerOptions() {
   var options = [ALL];
-  var i;
-  for (i = 0; i < LIST.length; i++) {
-    options.push(LIST[i]);
-  }
-  return options;
+  return options.concat(_dynasties());
 }
 
 function keys() {
-  return LIST.map(function (d) {
+  return _dynasties().map(function (d) {
     return d.key;
   });
 }
 
+function idOf(key) {
+  var item = findByKey(key);
+  return item && item.id != null ? item.id : null;
+}
+
 function findByKey(key) {
   if (!key) return ALL;
+  var list = _dynasties();
   var i;
-  for (i = 0; i < LIST.length; i++) {
-    if (LIST[i].key === key) return LIST[i];
+  for (i = 0; i < list.length; i++) {
+    if (list[i].key === key) return list[i];
   }
   return null;
 }
@@ -60,9 +127,10 @@ function rulerOf(key) {
 }
 
 function atYear(year) {
+  var list = _dynasties();
   var i;
-  for (i = 0; i < LIST.length; i++) {
-    var d = LIST[i];
+  for (i = 0; i < list.length; i++) {
+    var d = list[i];
     if (year >= d.start && year <= d.end) return d.key;
   }
   return "";
@@ -74,80 +142,38 @@ function titleAtYear(year) {
 }
 
 function periodsForTimeline() {
-  return LIST.map(function (d) {
+  return _dynasties().map(function (d) {
     return { name: d.ruler, start: d.start, end: d.end };
   });
 }
 
-/** 首页时代范围，与后端 EraConstants 一致 */
-var ERA_ALL = {
-  key: "",
-  ruler: "全部",
-  title: "全部朝代",
-  subtitle: "不限",
-  dynasties: null,
-};
-
-var ERAS = [
-  {
-    key: "proto",
-    ruler: "远古",
-    title: "远古",
-    subtitle: "秦 · 汉",
-    dynasties: ["秦", "汉"],
-  },
-  {
-    key: "classic",
-    ruler: "古代",
-    title: "古代",
-    subtitle: "三国至唐",
-    dynasties: ["三国", "晋", "南北朝", "隋", "唐"],
-  },
-  {
-    key: "empire",
-    ruler: "近古",
-    title: "近古",
-    subtitle: "宋元至清",
-    dynasties: ["宋", "元", "明", "清"],
-  },
-  {
-    key: "modern",
-    ruler: "近代",
-    title: "近代",
-    subtitle: "民国",
-    dynasties: ["民国"],
-  },
-];
-
 function eraPickerOptions() {
   var options = [ERA_ALL];
-  var i;
-  for (i = 0; i < ERAS.length; i++) {
-    options.push(ERAS[i]);
-  }
-  return options;
+  return options.concat(_eras());
 }
 
 function findEraByKey(key) {
   if (!key) return ERA_ALL;
+  var list = _eras();
   var i;
-  for (i = 0; i < ERAS.length; i++) {
-    if (ERAS[i].key === key) return ERAS[i];
+  for (i = 0; i < list.length; i++) {
+    if (list[i].key === key) return list[i];
   }
   return null;
 }
 
 module.exports = {
   ALL: ALL,
-  LIST: LIST,
+  LIST: [],
   ERA_ALL: ERA_ALL,
-  ERAS: ERAS,
+  ERAS: [],
   pickerOptions: pickerOptions,
   eraPickerOptions: eraPickerOptions,
   findEraByKey: findEraByKey,
   keys: keys,
   titleOf: titleOf,
   rulerOf: rulerOf,
+  idOf: idOf,
   atYear: atYear,
   titleAtYear: titleAtYear,
   periodsForTimeline: periodsForTimeline,

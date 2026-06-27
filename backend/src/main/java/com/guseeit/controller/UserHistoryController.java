@@ -5,6 +5,7 @@ import com.guseeit.service.UserHistoryService;
 import com.guseeit.service.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -49,10 +50,11 @@ public class UserHistoryController {
     @GetMapping("/history")
     public ResponseEntity<Map<String, Object>> list(
             @RequestParam(required = false) String token,
+            @RequestHeader(value = "Authorization", required = false) String authorization,
             @RequestParam(defaultValue = "0") int offset,
             @RequestParam(defaultValue = "20") int limit) {
 
-        Long userId = userService.resolveUserId(token);
+        Long userId = userService.resolveUserId(token, authorization);
         if (userId == null) {
             Map<String, Object> err = new LinkedHashMap<>();
             err.put("error", "未登录");

@@ -6,6 +6,7 @@ App({
     sessionRoundScores: [],
     token: "",
     loginReady: false,
+    dynastiesData: null,
   },
 
   onLaunch: function () {
@@ -13,10 +14,13 @@ App({
     var saved = tt.getStorageSync("guseeit_token");
     if (saved) {
       self.globalData.token = saved;
-      // 已有 token 不阻塞业务，但后台尝试刷新
-      self.globalData.loginReady = true;
     }
-    // 始终尝试 tt.login 获取新 token（不阻塞）
+    // 登录最多阻塞 3 秒，避免业务请求一直 pending
+    setTimeout(function () {
+      if (!self.globalData.loginReady) {
+        self.globalData.loginReady = true;
+      }
+    }, 3000);
     tt.login({
       force: false,
       success: function (res) {

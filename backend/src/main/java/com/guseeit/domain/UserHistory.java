@@ -19,7 +19,12 @@ public class UserHistory {
     @Column(name = "user_id", nullable = false)
     private Long userId;
 
-    @Column(name = "round_id", nullable = false, length = 64)
+    /** 对应 anecdote_image 表的 ID */
+    @Column(name = "image_id", nullable = false)
+    private Long imageId;
+
+    /** 兼容旧表结构 round_id（与 image_id 同步） */
+    @Column(name = "round_id", length = 64)
     private String roundId;
 
     @Column(name = "guess_city", length = 64)
@@ -73,69 +78,61 @@ public class UserHistory {
     @Column(name = "modern_place", length = 64)
     private String modernPlace;
 
+    @Column(name = "anecdote_name", length = 64)
+    private String anecdoteName;
+
+    @Column(name = "knowledge_summary", columnDefinition = "TEXT")
+    private String knowledgeSummary;
+
     @Column(name = "answered_at", nullable = false)
     private LocalDateTime answeredAt = LocalDateTime.now();
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
-
     public Long getUserId() { return userId; }
     public void setUserId(Long userId) { this.userId = userId; }
-
+    public Long getImageId() { return imageId; }
+    public void setImageId(Long imageId) { this.imageId = imageId; }
     public String getRoundId() { return roundId; }
     public void setRoundId(String roundId) { this.roundId = roundId; }
-
     public String getGuessCity() { return guessCity; }
     public void setGuessCity(String guessCity) { this.guessCity = guessCity; }
-
     public Double getGuessLat() { return guessLat; }
     public void setGuessLat(Double guessLat) { this.guessLat = guessLat; }
-
     public Double getGuessLng() { return guessLng; }
     public void setGuessLng(Double guessLng) { this.guessLng = guessLng; }
-
     public Integer getGuessYear() { return guessYear; }
     public void setGuessYear(Integer guessYear) { this.guessYear = guessYear; }
-
     public String getGuessDynasty() { return guessDynasty; }
     public void setGuessDynasty(String guessDynasty) { this.guessDynasty = guessDynasty; }
-
     public String getAnswerCity() { return answerCity; }
     public void setAnswerCity(String answerCity) { this.answerCity = answerCity; }
-
     public Double getAnswerLat() { return answerLat; }
     public void setAnswerLat(Double answerLat) { this.answerLat = answerLat; }
-
     public Double getAnswerLng() { return answerLng; }
     public void setAnswerLng(Double answerLng) { this.answerLng = answerLng; }
-
     public Integer getAnswerYear() { return answerYear; }
     public void setAnswerYear(Integer answerYear) { this.answerYear = answerYear; }
-
     public String getAnswerDynasty() { return answerDynasty; }
     public void setAnswerDynasty(String answerDynasty) { this.answerDynasty = answerDynasty; }
-
     public int getTotalScore() { return totalScore; }
     public void setTotalScore(int totalScore) { this.totalScore = totalScore; }
-
     public int getDynastyScore() { return dynastyScore; }
     public void setDynastyScore(int dynastyScore) { this.dynastyScore = dynastyScore; }
-
     public int getGeoScore() { return geoScore; }
     public void setGeoScore(int geoScore) { this.geoScore = geoScore; }
-
     public double getDistanceKm() { return distanceKm; }
     public void setDistanceKm(double distanceKm) { this.distanceKm = distanceKm; }
-
     public String getImageUrl() { return imageUrl; }
     public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
-
     public String getLocationName() { return locationName; }
     public void setLocationName(String locationName) { this.locationName = locationName; }
-
     public String getModernPlace() { return modernPlace; }
     public void setModernPlace(String modernPlace) { this.modernPlace = modernPlace; }
-
+    public String getAnecdoteName() { return anecdoteName; }
+    public void setAnecdoteName(String anecdoteName) { this.anecdoteName = anecdoteName; }
+    public String getKnowledgeSummary() { return knowledgeSummary; }
+    public void setKnowledgeSummary(String knowledgeSummary) { this.knowledgeSummary = knowledgeSummary; }
     public LocalDateTime getAnsweredAt() { return answeredAt; }
     public void setAnsweredAt(LocalDateTime answeredAt) { this.answeredAt = answeredAt; }
 }

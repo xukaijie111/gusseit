@@ -178,7 +178,7 @@ Page({
     pickedCity: "",
     cityResolving: false,
     yearAd: 0,
-    displayYearShort: "",
+    dynastyId: null,
     currentDynasty: "",
     currentDynastyTitle: "",
     scrollLeft: 0,
@@ -223,6 +223,7 @@ Page({
 
   onLoad: function (options) {
     var index = Number(options.index || 0);
+    var self = this;
     var app = getApp();
     var round = app.globalData.rounds[index];
 
@@ -232,18 +233,59 @@ Page({
       return;
     }
 
+    self._roundIndex = index;
+    self._round = round;
+    self.setData({ roundIndex: index, round: round });
+
+    self._initRuler();
+  },
+
+  _initRuler: function () {
+    var self = this;
+    var app = getApp();
+    var CACHE_KEY = "guseeit_dynasties";
+
+    function applyAndBuild(data) {
+      app.globalData.dynastiesData = data;
+      self._doInitRuler();
+    }
+
+    if (app.globalData.dynastiesData) {
+      self._doInitRuler();
+      return;
+    }
+
+    try {
+      var cached = tt.getStorageSync(CACHE_KEY);
+      if (cached && cached.dynasties && cached.dynasties.length) {
+        applyAndBuild(cached);
+        return;
+      }
+    } catch (e) {}
+
+    api.fetchDynasties().then(function (data) {
+      try {
+        tt.setStorageSync(CACHE_KEY, data);
+      } catch (e) {}
+      applyAndBuild(data);
+    }).catch(function () {
+      self._doInitRuler();
+    });
+  },
+
+  _doInitRuler: function () {
+    var self = this;
     var sys = tt.getSystemInfoSync();
     var winW = sys.windowWidth;
     var innerWidth = timeline.contentWidthPx();
     var defaultYear = timeline.defaultYear();
+    var defaultDynasty = timeline.dynastyAt(defaultYear);
 
-    this.setData({
-      roundIndex: index,
-      round: round,
+    self.setData({
       yearAd: defaultYear,
-      displayYearShort: timeline.formatYearShort(defaultYear),
-      currentDynasty: "",
-      currentDynastyTitle: "",
+      dynastyId: defaultDynasty ? dynasties.idOf(defaultDynasty) : null,
+      currentDynasty: defaultDynasty,
+      currentDynastyTitle: defaultDynasty ? timeline.dynastyTitleAt(defaultYear) : "",
       rulerSegments: timeline.buildSegments(),
       rulerTicks: timeline.buildTicks(),
       rulerInnerWidth: innerWidth,
@@ -347,7 +389,7 @@ Page({
     var dynasty = timeline.dynastyAt(year);
     this.setData({
       yearAd: year,
-      displayYearShort: timeline.formatYearShort(year),
+      dynastyId: dynasty ? dynasties.idOf(dynasty) : null,
       currentDynasty: dynasty,
       currentDynastyTitle: dynasty ? timeline.dynastyTitleAt(year) : "",
     });
@@ -440,10 +482,15 @@ Page({
     var self = this;
     var round = this.data.round;
 
+    if (!this.data.dynastyId) {
+      tt.showToast({ title: "请选择朝代", icon: "none" });
+      return;
+    }
+
     api
       .submitGuess({
-        roundId: round.id,
-        yearAd: this.data.yearAd,
+        imageId: round.id,
+        dynastyId: this.data.dynastyId,
         latitude: this.data.pickLat,
         longitude: this.data.pickLng,
         token: getApp().getToken(),

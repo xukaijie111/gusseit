@@ -19,19 +19,12 @@ public class GuessResultView {
     private AnswerView answer;
 
     public static GuessResultView create(
-            int dynastyScore,
-            int geoScore,
-            double distanceKm,
-            String guessDynasty,
-            String answerDynasty,
-            Integer guessYearAd,
-            Integer answerYearAd,
-            String guessCity,
-            String answerCity,
-            double guessLatitude,
-            double guessLongitude,
-            Double answerLatitude,
-            Double answerLongitude,
+            int dynastyScore, int geoScore, double distanceKm,
+            String guessDynasty, String answerDynasty,
+            Integer guessYearAd, Integer answerYearAd,
+            String guessCity, String answerCity,
+            double guessLatitude, double guessLongitude,
+            Double answerLatitude, Double answerLongitude,
             AnswerView answer
     ) {
         GuessResultView view = new GuessResultView();
@@ -71,10 +64,8 @@ public class GuessResultView {
 
     public static class AnswerView {
         private String dynasty;
-        private String locationName;
         private String modernPlace;
         private String timeLabel;
-        private Integer yearAd;
         private String knowledgeSummary;
         private String anecdoteTitle;
         private String historicalCityName;
@@ -82,14 +73,10 @@ public class GuessResultView {
 
         public String getDynasty() { return dynasty; }
         public void setDynasty(String dynasty) { this.dynasty = dynasty; }
-        public String getLocationName() { return locationName; }
-        public void setLocationName(String locationName) { this.locationName = locationName; }
         public String getModernPlace() { return modernPlace; }
         public void setModernPlace(String modernPlace) { this.modernPlace = modernPlace; }
         public String getTimeLabel() { return timeLabel; }
         public void setTimeLabel(String timeLabel) { this.timeLabel = timeLabel; }
-        public Integer getYearAd() { return yearAd; }
-        public void setYearAd(Integer yearAd) { this.yearAd = yearAd; }
         public String getKnowledgeSummary() { return knowledgeSummary; }
         public void setKnowledgeSummary(String knowledgeSummary) { this.knowledgeSummary = knowledgeSummary; }
         public String getAnecdoteTitle() { return anecdoteTitle; }

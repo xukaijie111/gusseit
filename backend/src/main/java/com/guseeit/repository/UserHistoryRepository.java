@@ -15,6 +15,6 @@ public interface UserHistoryRepository extends JpaRepository<UserHistory, Long> 
 
     int countByUserId(Long userId);
 
-    @Query("SELECT h.roundId FROM UserHistory h WHERE h.userId = :userId")
-    List<String> findRoundIdsByUserId(@Param("userId") Long userId);
+    @Query("SELECT h.imageId FROM UserHistory h WHERE h.userId = :userId")
+    List<Long> findImageIdsByUserId(@Param("userId") Long userId);
 }

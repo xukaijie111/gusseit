@@ -6,8 +6,6 @@ import com.aliyun.oss.model.CannedAccessControlList;
 import com.aliyun.oss.model.ObjectMetadata;
 import com.aliyun.oss.model.PutObjectRequest;
 import com.guseeit.config.GuseeitProperties;
-import com.guseeit.dto.RoundPromptDto;
-import com.guseeit.support.DynastyConstants;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PreDestroy;
@@ -39,8 +37,16 @@ public class OssService {
         public String getImageUrl() { return imageUrl; }
     }
 
-    public UploadResult upload(byte[] data, RoundPromptDto meta) {
-        String fileName = buildObjectFileName(meta);
+    /** 上传图片，用自定义名称作为文件名标识 */
+    public UploadResult upload(byte[] data, String name) {
+        String slug = name.replaceAll("[^\\u4e00-\\u9fa5a-zA-Z0-9]", "").trim();
+        if (slug.length() > 20) slug = slug.substring(0, 20);
+        String id = UUID.randomUUID().toString().substring(0, 8);
+        String fileName = slug + "-" + id + ".png";
+        return doUpload(data, fileName);
+    }
+
+    private UploadResult doUpload(byte[] data, String fileName) {
         String prefix = oss.getPrefix() == null ? "guseeit/rounds" : oss.getPrefix().replaceAll("/$", "");
         String objectKey = prefix + "/" + fileName;
 
@@ -80,18 +86,20 @@ public class OssService {
         return client;
     }
 
+    public void delete(String objectKey) {
+        if (objectKey == null || objectKey.trim().isEmpty()) return;
+        try {
+            getClient().deleteObject(oss.getBucket(), objectKey);
+        } catch (Exception e) {
+            // 删除 OSS 对象失败不应阻塞主流程，仅记录
+        }
+    }
+
     @PreDestroy
     void shutdown() {
         if (client != null) {
             client.shutdown();
         }
-    }
-
-    static String buildObjectFileName(RoundPromptDto meta) {
-        String dynasty = DynastyConstants.slug(meta.getDynasty());
-        int year = Math.abs(meta.getYearAd() == null ? 0 : meta.getYearAd());
-        String id = UUID.randomUUID().toString().substring(0, 8);
-        return dynasty + "-" + year + "-" + id + ".png";
     }
 
     private static String encodePath(String objectKey) {

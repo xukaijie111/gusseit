@@ -10,76 +10,57 @@ public final class EraConstants {
 
     public static final String ALL = "";
 
-    private static final Map<String, Era> ERAS = new LinkedHashMap<String, Era>();
+    private static final Map<String, Era> ERAS = new LinkedHashMap<>();
 
     static {
-        ERAS.put("proto", new Era(
-                "proto",
-                "远古",
-                "远古",
-                "秦 · 汉",
-                Arrays.asList("秦", "汉")
-        ));
-        ERAS.put("classic", new Era(
-                "classic",
-                "古代",
-                "古代",
-                "三国至唐",
-                Arrays.asList("三国", "晋", "南北朝", "隋", "唐")
-        ));
-        ERAS.put("empire", new Era(
-                "empire",
-                "近古",
-                "近古",
-                "宋元至清",
-                Arrays.asList("宋", "元", "明", "清")
-        ));
-        ERAS.put("modern", new Era(
-                "modern",
-                "近代",
-                "近代",
-                "民国",
-                Collections.singletonList("民国")
-        ));
+        ERAS.put("preqin",    new Era("preqin",    "先秦",   "先秦",   "春秋 · 战国",
+                Arrays.asList(1, 2)));
+        ERAS.put("qinhan",    new Era("qinhan",    "秦汉",   "秦汉",   "秦至三国",
+                Arrays.asList(3, 4, 5, 6, 7)));
+        ERAS.put("weijin",    new Era("weijin",    "魏晋南北朝", "魏晋南北朝", "西晋至隋",
+                Arrays.asList(8, 9, 10, 11)));
+        ERAS.put("suitang",   new Era("suitang",   "隋唐五代", "隋唐五代", "隋至五代十国",
+                Arrays.asList(11, 12, 13)));
+        ERAS.put("songyuan",  new Era("songyuan",  "宋元",   "宋元",   "北宋至元",
+                Arrays.asList(14, 15, 16)));
+        ERAS.put("mingqing",  new Era("mingqing",  "明清",   "明清",   "明 · 清",
+                Arrays.asList(17, 18)));
     }
 
-    private EraConstants() {
+    private EraConstants() {}
+
+    public static List<Era> getAll() {
+        List<Era> list = new java.util.ArrayList<>();
+        for (String key : eraKeys()) {
+            Era e = ERAS.get(key);
+            if (e != null) list.add(e);
+        }
+        return list;
     }
 
     public static List<String> eraKeys() {
-        return Collections.unmodifiableList(Arrays.asList("proto", "classic", "empire", "modern"));
+        return Collections.unmodifiableList(Arrays.asList("preqin","qinhan","weijin","suitang","songyuan","mingqing"));
     }
 
-    public static List<String> dynastiesFor(String eraKey) {
-        if (eraKey == null || eraKey.trim().isEmpty()) {
-            return null;
-        }
+    public static List<Integer> dynastyIdsFor(String eraKey) {
+        if (eraKey == null || eraKey.trim().isEmpty()) return null;
         Era era = ERAS.get(eraKey.trim());
-        if (era == null) {
-            throw new IllegalArgumentException("无效时代范围");
-        }
-        return era.getDynasties();
+        if (era == null) throw new IllegalArgumentException("无效时代范围");
+        return era.dynastyIds;
     }
 
     public static final class Era {
-        private final String key;
-        private final String ruler;
-        private final String title;
-        private final String subtitle;
-        private final List<String> dynasties;
+        private final String key, ruler, title, subtitle;
+        private final List<Integer> dynastyIds;
 
-        public Era(String key, String ruler, String title, String subtitle, List<String> dynasties) {
-            this.key = key;
-            this.ruler = ruler;
-            this.title = title;
-            this.subtitle = subtitle;
-            this.dynasties = Collections.unmodifiableList(dynasties);
+        Era(String key, String ruler, String title, String subtitle, List<Integer> dynastyIds) {
+            this.key = key; this.ruler = ruler; this.title = title; this.subtitle = subtitle;
+            this.dynastyIds = Collections.unmodifiableList(dynastyIds);
         }
-
         public String getKey() { return key; }
         public String getRuler() { return ruler; }
         public String getTitle() { return title; }
         public String getSubtitle() { return subtitle; }
-        public List<String> getDynasties() { return dynasties; }
+        public List<Integer> getDynastyIds() { return dynastyIds; }
     }
 }

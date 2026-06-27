@@ -208,6 +208,22 @@ public class GeocodeClient {
         return s.trim();
     }
 
+    /**
+     * 用户选的城市名是否包含答案的现代地名（归一化后）。
+     * 例如用户选 "西安市雁塔区" 归一化后 "西安雁塔" 包含答案 "西安" → true。
+     */
+    public static boolean cityContains(String userCity, String answerModernPlace) {
+        if (userCity == null || answerModernPlace == null) {
+            return false;
+        }
+        String nu = normalizeCityKey(userCity);
+        String na = normalizeCityKey(answerModernPlace);
+        if (nu.isEmpty() || na.isEmpty()) {
+            return false;
+        }
+        return nu.contains(na) || na.contains(nu);
+    }
+
     public static String formatCityLabel(String name) {
         if (name == null || name.trim().isEmpty()) {
             return "未知地区";

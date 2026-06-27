@@ -39,6 +39,11 @@ public class ArkImageClient {
         body.put("response_format", "url");
         body.put("watermark", false);
 
+        // Seedream 5.0 提示词优化（即梦同款效果）
+        Map<String, String> optimize = new HashMap<String, String>();
+        optimize.put("mode", "standard");
+        body.put("optimize_prompt_options", optimize);
+
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.set("Authorization", "Bearer " + ark.getApiKey());

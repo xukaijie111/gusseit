@@ -5,6 +5,11 @@ public final class ScoreCalculator {
     private ScoreCalculator() {
     }
 
+    public static int dynastyScoreById(Integer guessId, Integer answerId) {
+        if (guessId == null || answerId == null) return 0;
+        return guessId.equals(answerId) ? 100 : 0;
+    }
+
     public static int dynastyScore(String guessDynasty, String answerDynasty) {
         if (guessDynasty == null || answerDynasty == null) {
             return 0;

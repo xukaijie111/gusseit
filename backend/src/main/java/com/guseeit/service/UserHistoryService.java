@@ -1,11 +1,12 @@
 package com.guseeit.service;
 
-import com.guseeit.domain.Round;
+import com.guseeit.domain.AnecdoteImage;
 import com.guseeit.domain.UserHistory;
 import com.guseeit.dto.GuessResultView;
 import com.guseeit.dto.UserHistoryView;
-import com.guseeit.repository.RoundRepository;
+import com.guseeit.repository.AnecdoteImageRepository;
 import com.guseeit.repository.UserHistoryRepository;
+import com.guseeit.support.DynastyConstants;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
@@ -17,21 +18,22 @@ import java.util.Optional;
 public class UserHistoryService {
 
     private final UserHistoryRepository historyRepository;
-    private final RoundRepository roundRepository;
+    private final AnecdoteImageRepository imageRepository;
 
-    public UserHistoryService(UserHistoryRepository historyRepository, RoundRepository roundRepository) {
+    public UserHistoryService(UserHistoryRepository historyRepository, AnecdoteImageRepository imageRepository) {
         this.historyRepository = historyRepository;
-        this.roundRepository = roundRepository;
+        this.imageRepository = imageRepository;
     }
 
-    public List<String> answeredRoundIds(Long userId) {
-        return historyRepository.findRoundIdsByUserId(userId);
+    public List<Long> answeredImageIds(Long userId) {
+        return historyRepository.findImageIdsByUserId(userId);
     }
 
-    public void save(Long userId, GuessResultView result, String roundId, String imageUrl) {
+    public void save(Long userId, GuessResultView result, AnecdoteImage image) {
         UserHistory h = new UserHistory();
         h.setUserId(userId);
-        h.setRoundId(roundId);
+        h.setImageId(image.getId());
+        h.setRoundId(String.valueOf(image.getId()));
         h.setGuessCity(result.getGuessCity());
         h.setGuessLat(result.getGuessLatitude());
         h.setGuessLng(result.getGuessLongitude());
@@ -46,14 +48,11 @@ public class UserHistoryService {
         h.setDynastyScore(result.getDynastyScore());
         h.setGeoScore(result.getGeoScore());
         h.setDistanceKm(result.getDistanceKm());
-        h.setImageUrl(imageUrl);
-
-        GuessResultView.AnswerView ans = result.getAnswer();
-        if (ans != null) {
-            h.setLocationName(ans.getLocationName());
-            h.setModernPlace(ans.getModernPlace());
-        }
-
+        h.setImageUrl(image.getImageUrl());
+        h.setLocationName(image.getHistoricalPlace());
+        h.setModernPlace(image.getModernCity());
+        h.setAnecdoteName(image.getAnecdoteName());
+        h.setKnowledgeSummary(image.getSummary());
         historyRepository.save(h);
     }
 
@@ -63,15 +62,12 @@ public class UserHistoryService {
 
     public List<UserHistoryView> list(Long userId, int offset, int limit) {
         int size = Math.min(Math.max(limit, 1), 50);
-        int page = offset / size;
-        List<UserHistory> rows = historyRepository.findByUserIdOrderByAnsweredAtDesc(
-                userId, PageRequest.of(page, size));
-
+        List<UserHistory> rows = historyRepository.findByUserIdOrderByAnsweredAtDesc(userId, PageRequest.of(offset / size, size));
         List<UserHistoryView> views = new ArrayList<>();
         for (UserHistory h : rows) {
             UserHistoryView v = new UserHistoryView();
             v.setId(h.getId());
-            v.setRoundId(h.getRoundId());
+            v.setRoundId(String.valueOf(h.getImageId()));
             v.setGuessCity(h.getGuessCity());
             v.setGuessLat(h.getGuessLat());
             v.setGuessLng(h.getGuessLng());
@@ -90,16 +86,16 @@ public class UserHistoryService {
             v.setLocationName(h.getLocationName());
             v.setModernPlace(h.getModernPlace());
             v.setAnsweredAt(h.getAnsweredAt().toString());
+            v.setAnecdoteTitle(h.getAnecdoteName());
+            v.setKnowledgeSummary(h.getKnowledgeSummary());
 
-            Optional<Round> round = roundRepository.findById(h.getRoundId());
-            if (round.isPresent()) {
-                Round r = round.get();
-                v.setHistoricalCity(r.getHistoricalCity());
-                v.setTimeLabel(r.getTimeLabel());
-                v.setKnowledgeSummary(r.getKnowledgeSummary());
-                v.setAnecdoteTitle(r.getSceneType());
+            if (h.getImageId() != null) {
+                Optional<AnecdoteImage> img = imageRepository.findById(h.getImageId());
+                if (img.isPresent()) {
+                    v.setHistoricalCity(img.get().getHistoricalPlace());
+                    v.setTimeLabel(DynastyConstants.toName(img.get().getDynastyId()));
+                }
             }
-
             views.add(v);
         }
         return views;

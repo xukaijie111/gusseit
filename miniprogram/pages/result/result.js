@@ -1,7 +1,5 @@
 const dynasties = require("../../utils/dynasties.js");
 
-const timeline = require("../../utils/timeline.js");
-
 Page({
   data: {
     roundIndex: 0,
@@ -12,8 +10,6 @@ Page({
     guessDynasty: "",
     guessDynastyTitle: "",
     answerDynastyTitle: "",
-    guessYearLabel: "",
-    answerYearLabel: "",
     guessCity: "",
     answerCity: "",
     answer: null,
@@ -41,10 +37,6 @@ Page({
       guessDynasty: result.guessDynasty || "",
       guessDynastyTitle: dynasties.titleOf(result.guessDynasty),
       answerDynastyTitle: dynasties.titleOf(result.answer && result.answer.dynasty),
-      guessYearLabel:
-        result.guessYearAd != null ? timeline.formatYearShort(result.guessYearAd) : "—",
-      answerYearLabel:
-        result.answerYearAd != null ? timeline.formatYearShort(result.answerYearAd) : "—",
       guessCity: result.guessCity || "",
       answerCity: result.answerCity || (result.answer && result.answer.modernPlace) || "",
       answer: result.answer,

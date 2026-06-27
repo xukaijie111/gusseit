@@ -28,6 +28,21 @@ public class UserService {
         return tokenStore.get(token);
     }
 
+    public Long resolveUserId(String token, String authorization) {
+        String resolved = token;
+        if (resolved == null || resolved.trim().isEmpty()) {
+            resolved = bearerToken(authorization);
+        }
+        return resolveUserId(resolved);
+    }
+
+    private static String bearerToken(String authorization) {
+        if (authorization != null && authorization.startsWith("Bearer ")) {
+            return authorization.substring(7).trim();
+        }
+        return null;
+    }
+
     public String login(String code) {
         DouyinClient.SessionInfo session = douyinClient.code2Session(code);
         if (session == null || session.getOpenid().isEmpty()) {

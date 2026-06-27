@@ -14,7 +14,8 @@ CREATE TABLE IF NOT EXISTS users (
 CREATE TABLE IF NOT EXISTS user_histories (
     id              BIGINT AUTO_INCREMENT PRIMARY KEY,
     user_id         BIGINT       NOT NULL,
-    round_id        VARCHAR(64)  NOT NULL,
+    image_id        BIGINT       NOT NULL,
+    round_id        VARCHAR(64)  NULL,
     guess_city      VARCHAR(64)  NULL,
     guess_lat       DOUBLE       NULL,
     guess_lng       DOUBLE       NULL,
@@ -32,8 +33,10 @@ CREATE TABLE IF NOT EXISTS user_histories (
     image_url       VARCHAR(512) NULL,
     location_name   VARCHAR(128) NULL,
     modern_place    VARCHAR(64)  NULL,
+    anecdote_name   VARCHAR(64)  NULL,
+    knowledge_summary TEXT       NULL,
     answered_at     DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
     INDEX idx_user_id (user_id),
-    INDEX idx_user_round (user_id, round_id),
+    INDEX idx_user_image (user_id, image_id),
     CONSTRAINT fk_history_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
