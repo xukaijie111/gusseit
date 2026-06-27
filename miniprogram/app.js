@@ -1,3 +1,5 @@
+const bgm = require("./utils/bgm.js");
+
 App({
   globalData: {
     rounds: [],
@@ -7,10 +9,13 @@ App({
     token: "",
     loginReady: false,
     dynastiesData: null,
+    bgm: null,
+    bgmPausedByHide: false,
   },
 
   onLaunch: function () {
     var self = this;
+    bgm.initBgm(self);
     var saved = tt.getStorageSync("guseeit_token");
     if (saved) {
       self.globalData.token = saved;
@@ -36,6 +41,10 @@ App({
         }
       },
     });
+  },
+
+  onShow: function () {
+    bgm.playBgm(this);
   },
 
   _loginWithCode: function (code) {
